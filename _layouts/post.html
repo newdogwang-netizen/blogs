@@ -5,7 +5,7 @@ layout: default
   <header class="post-hero shell-narrow">
     <a class="back-link" href="{{ '/' | relative_url }}">← 返回文章列表</a>
     <div class="post-kicker">
-      {% if page.series %}<span>{{ page.series }}</span><span>第 {{ page.series_part }} 篇</span>
+      {% if page.series %}<span>{{ page.series }}</span><span>{% if page.series_part == 0 %}架构前篇{% else %}第 {{ page.series_part }} 篇{% endif %}</span>
       {% else %}<span>{{ page.category_name | default: page.categories.first }}</span>{% endif %}
     </div>
     <h1>{{ page.title }}</h1>
