@@ -1,0 +1,39 @@
+---
+layout: default
+title: "分类"
+description: "按主题浏览 newdogwang's blog 的全部文章。"
+permalink: /categories/
+---
+<section class="category-page shell">
+  <header class="category-hero">
+    <p class="eyebrow">TOPICS / ALL NOTES</p>
+    <h1>从一个专题开始，<br>逐步建立知识地图。</h1>
+    <p>分类负责领域，标签负责细节，专题系列负责阅读顺序。</p>
+  </header>
+
+  <div class="category-groups">
+    {% assign sorted_categories = site.categories | sort %}
+    {% for category in sorted_categories %}
+      {% assign category_key = category[0] %}
+      {% assign category_posts = category[1] %}
+      <section class="category-group" id="{{ category_key }}">
+        <header>
+          <div>
+            <p class="category-slug">{{ category_key }}</p>
+            <h2>{% if category_key == 'ai-gpu' %}AI 与 GPU{% else %}{{ category_key | replace: '-', ' ' | capitalize }}{% endif %}</h2>
+          </div>
+          <span>{{ category_posts | size }} 篇</span>
+        </header>
+        <ol>
+          {% for post in category_posts %}
+            <li>
+              <time>{{ post.date | date: '%Y-%m-%d' }}</time>
+              <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+              <span>{{ post.reading_time }}</span>
+            </li>
+          {% endfor %}
+        </ol>
+      </section>
+    {% endfor %}
+  </div>
+</section>

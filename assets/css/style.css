@@ -130,6 +130,20 @@ img { max-width: 100%; }
 .about-lede { color: var(--muted); font-size: 1.22rem; }
 .not-found { min-height: 65vh; padding-block: 120px; }
 .not-found p:not(.eyebrow) { margin-bottom: 32px; color: var(--muted); }
+.category-page { padding-block: 100px 120px; }
+.category-hero { max-width: 920px; margin-bottom: 80px; }
+.category-hero h1 { margin: 0; font: 500 clamp(3rem, 6vw, 5.8rem)/1.05 Georgia, "Songti SC", serif; letter-spacing: -.045em; }
+.category-hero > p:last-child { max-width: 620px; margin: 28px 0 0; color: var(--muted); font-size: 1.1rem; }
+.category-groups { border-top: 1px solid var(--ink); }
+.category-group { padding: 42px 0 55px; border-bottom: 1px solid var(--line); }
+.category-group > header { display: flex; align-items: end; justify-content: space-between; gap: 30px; margin-bottom: 26px; }
+.category-group h2 { margin: 3px 0 0; font: 500 clamp(2rem, 4vw, 3.4rem)/1.1 Georgia, "Songti SC", serif; }
+.category-group > header > span, .category-slug { margin: 0; color: var(--muted); font: .72rem ui-monospace, monospace; letter-spacing: .08em; }
+.category-group ol { margin: 0; padding: 0; list-style: none; }
+.category-group li { display: grid; grid-template-columns: 110px 1fr 70px; gap: 22px; align-items: baseline; padding: 15px 0; border-top: 1px solid var(--line); }
+.category-group li time, .category-group li span { color: var(--muted); font: .72rem ui-monospace, monospace; }
+.category-group li a { font-family: Georgia, "Songti SC", serif; font-size: 1.08rem; text-decoration: none; }
+.category-group li a:hover { color: var(--accent); }
 .site-footer { border-top: 1px solid var(--line); }
 .footer-inner { display: flex; justify-content: space-between; gap: 30px; padding-block: 34px; color: var(--muted); font-size: .78rem; }
 .footer-inner p { margin: 0; }
@@ -149,7 +163,7 @@ img { max-width: 100%; }
   .header-inner { min-height: 64px; }
   .brand span { display: none; }
   .site-nav { gap: 15px; font-size: .8rem; }
-  .site-nav a:nth-child(2) { display: none; }
+  .site-nav a:nth-child(3) { display: none; }
   .hero-grid { padding-block: 56px; }
   .hero-copy h1 { font-size: clamp(2.8rem, 14vw, 4.6rem); }
   .hero-lede { font-size: 1rem; }
@@ -166,6 +180,10 @@ img { max-width: 100%; }
   .post-body h2 { font-size: 1.65rem; }
   .post-body table { display: block; overflow-x: auto; white-space: nowrap; }
   .series-panel { margin-bottom: 70px; padding: 23px; }
+  .category-page { padding-block: 70px 85px; }
+  .category-hero { margin-bottom: 55px; }
+  .category-group li { grid-template-columns: 1fr; gap: 4px; }
+  .category-group li span { display: none; }
   .footer-inner { display: block; }
   .footer-inner p + p { margin-top: 6px; }
 }

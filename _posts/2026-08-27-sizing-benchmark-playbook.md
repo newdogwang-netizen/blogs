@@ -3,7 +3,8 @@ layout: post
 title: "GPU 进阶笔记（八）：训练与推理选型——从容量估算、通信模型到验收测试"
 description: "一套可执行的 GPU 选型与验收方法：先算容量，再看通信，最后用业务基准测试做决定。"
 date: 2026-08-27 12:00:00 +0800
-categories: [gpu]
+categories: [ai-gpu]
+category_name: "AI 与 GPU"
 tags: [GPU 选型, MLPerf, NCCL, RCCL, 推理, 训练]
 series: "2026 GPU 进阶笔记"
 series_part: 4

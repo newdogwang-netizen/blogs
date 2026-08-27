@@ -4,7 +4,10 @@ layout: default
 <article class="post">
   <header class="post-hero shell-narrow">
     <a class="back-link" href="{{ '/' | relative_url }}">← 返回文章列表</a>
-    <div class="post-kicker"><span>{{ page.series }}</span><span>第 {{ page.series_part }} 篇</span></div>
+    <div class="post-kicker">
+      {% if page.series %}<span>{{ page.series }}</span><span>第 {{ page.series_part }} 篇</span>
+      {% else %}<span>{{ page.category_name | default: page.categories.first }}</span>{% endif %}
+    </div>
     <h1>{{ page.title }}</h1>
     <p class="post-description">{{ page.description }}</p>
     <div class="post-meta">
@@ -16,17 +19,18 @@ layout: default
 
   <div class="post-body shell-narrow">{{ content }}</div>
 
+  {% if page.series %}
   <aside class="series-panel shell-narrow">
     <p class="eyebrow">继续阅读</p>
-    <h2>2026 GPU 进阶笔记</h2>
+    <h2>{{ page.series }}</h2>
     <ol>
-      {% assign ordered_posts = site.posts | sort: 'series_part' %}
-      {% for post in ordered_posts %}
+      {% assign series_posts = site.posts | where: 'series', page.series | sort: 'series_part' %}
+      {% for post in series_posts %}
         <li{% if post.url == page.url %} class="current"{% endif %}>
           <a href="{{ post.url | relative_url }}"><span>0{{ post.series_part }}</span>{{ post.title }}</a>
         </li>
       {% endfor %}
     </ol>
   </aside>
+  {% endif %}
 </article>
-

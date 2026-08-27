@@ -3,7 +3,8 @@ layout: post
 title: "GPU 进阶笔记（六）：HBM4、FP4 与 KV Cache——算力数字为什么经常骗人"
 description: "用 Roofline、权重容量和 KV Cache 公式解释：为什么峰值 FLOPS 很高，真实模型却未必更快。"
 date: 2026-08-27 10:00:00 +0800
-categories: [gpu]
+categories: [ai-gpu]
+category_name: "AI 与 GPU"
 tags: [HBM4, FP4, MXFP4, KV Cache, Roofline]
 series: "2026 GPU 进阶笔记"
 series_part: 2

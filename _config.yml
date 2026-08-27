@@ -1,6 +1,6 @@
-title: "GPU Systems Notes"
-tagline: "理解硬件、互联与系统"
-description: "关于 GPU、AI 基础设施、分布式训练与高性能推理的中文技术笔记。"
+title: "newdogwang's blog"
+tagline: "技术、系统与研究笔记"
+description: "记录技术实践、系统原理、AI 基础设施与持续研究的个人博客。"
 url: "https://newdogwang-netizen.github.io"
 baseurl: "/blogs"
 lang: "zh-CN"
@@ -34,4 +34,3 @@ exclude:
   - work
   - outputs
   - README.md
-
