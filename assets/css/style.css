@@ -42,8 +42,8 @@ img { max-width: 100%; }
 .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
 
 .home-hero { overflow: hidden; border-bottom: 1px solid var(--line); }
-.hero-grid { min-height: 660px; display: grid; grid-template-columns: 1.15fr .85fr; align-items: center; gap: 80px; padding-block: 90px; }
-.hero-copy h1 { max-width: 760px; margin: 0; font: 500 clamp(3.4rem, 7vw, 6.9rem)/.98 Georgia, "Songti SC", serif; letter-spacing: -.055em; }
+.hero-grid { min-height: 660px; display: grid; grid-template-columns: 1.35fr .65fr; align-items: center; gap: 60px; padding-block: 90px; }
+.hero-copy h1 { max-width: 760px; margin: 0; font: 500 clamp(3.4rem, 6vw, 6.2rem)/.98 Georgia, "Songti SC", serif; letter-spacing: -.055em; }
 .hero-copy h1 em { color: var(--accent); font-weight: 500; }
 .hero-lede { max-width: 670px; margin: 34px 0 0; color: var(--muted); font-size: 1.14rem; line-height: 1.8; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 13px; margin-top: 36px; }
