@@ -1,4 +1,14 @@
-# GPU 进阶笔记（八）：训练与推理选型——从容量估算、通信模型到验收测试
+---
+layout: post
+title: "GPU 进阶笔记（八）：训练与推理选型——从容量估算、通信模型到验收测试"
+description: "一套可执行的 GPU 选型与验收方法：先算容量，再看通信，最后用业务基准测试做决定。"
+date: 2026-08-27 12:00:00 +0800
+categories: [gpu]
+tags: [GPU 选型, MLPerf, NCCL, RCCL, 推理, 训练]
+series: "2026 GPU 进阶笔记"
+series_part: 4
+reading_time: "18 分钟"
+---
 
 > 发布建议日期：2026-08-27  
 > 关键词：GPU 选型、容量规划、MLPerf、NCCL、RCCL、推理吞吐、验收
@@ -238,4 +248,3 @@ TCO = accelerators + servers + network + optics/cables
 - [MLPerf Training v6.0 结果公告](https://mlcommons.org/2026/06/mlperf-training-v6-0-results/)
 - [AMD MI355X Customer Acceptance Guide](https://instinct.docs.amd.com/projects/system-acceptance/en/latest/gpus/mi355x.html)
 - [NVIDIA GB300 NVL72 Reference Architecture](https://docs.nvidia.com/enterprise-reference-architectures/nvl72-ai-factory/latest/index.html)
-

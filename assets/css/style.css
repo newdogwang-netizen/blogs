@@ -1,0 +1,171 @@
+:root {
+  --bg: #f4f1e8; --surface: #ebe6da; --surface-strong: #ded7c7;
+  --ink: #151713; --muted: #62665c; --line: #cbc5b7;
+  --accent: #e65324; --accent-2: #1f6d5d;
+  --code-bg: #1c211e; --code-ink: #edf3e8;
+  --shadow: 0 24px 60px rgba(32, 35, 29, .12);
+  color-scheme: light;
+}
+html[data-theme="dark"] {
+  --bg: #111512; --surface: #191e1a; --surface-strong: #242a25;
+  --ink: #edf0e8; --muted: #a9afa4; --line: #353c36;
+  --accent: #ff7447; --accent-2: #71b9a5;
+  --code-bg: #090c0a; --code-ink: #e9f0e6;
+  --shadow: 0 24px 60px rgba(0, 0, 0, .35);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 17px/1.75 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  transition: background .25s ease, color .25s ease;
+}
+a { color: inherit; text-decoration-color: var(--accent); text-underline-offset: .2em; }
+img { max-width: 100%; }
+.shell { width: min(1180px, calc(100% - 48px)); margin-inline: auto; }
+.shell-narrow { width: min(820px, calc(100% - 48px)); margin-inline: auto; }
+.eyebrow { margin: 0 0 14px; color: var(--accent); font: 800 .76rem/1.4 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .14em; }
+
+.reading-progress { position: fixed; z-index: 100; inset: 0 0 auto; height: 3px; }
+.reading-progress span { display: block; width: 100%; height: 100%; background: var(--accent); transform: scaleX(0); transform-origin: left; }
+.site-header { position: sticky; z-index: 50; top: 0; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(16px); }
+.header-inner { min-height: 74px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.brand { display: inline-flex; align-items: center; gap: 11px; font-size: .95rem; text-decoration: none; letter-spacing: -.02em; }
+.brand strong { color: var(--accent); }
+.brand-mark { width: 33px; height: 33px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+.brand-mark circle { fill: var(--accent); stroke: none; }
+.site-nav { display: flex; align-items: center; gap: 25px; font-size: .88rem; font-weight: 650; }
+.site-nav a { text-decoration: none; }
+.site-nav a:hover { color: var(--accent); }
+.theme-toggle { width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; font-size: 1rem; }
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+.home-hero { overflow: hidden; border-bottom: 1px solid var(--line); }
+.hero-grid { min-height: 660px; display: grid; grid-template-columns: 1.15fr .85fr; align-items: center; gap: 80px; padding-block: 90px; }
+.hero-copy h1 { max-width: 760px; margin: 0; font: 500 clamp(3.4rem, 7vw, 6.9rem)/.98 Georgia, "Songti SC", serif; letter-spacing: -.055em; }
+.hero-copy h1 em { color: var(--accent); font-weight: 500; }
+.hero-lede { max-width: 670px; margin: 34px 0 0; color: var(--muted); font-size: 1.14rem; line-height: 1.8; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 13px; margin-top: 36px; }
+.button { display: inline-flex; min-height: 48px; align-items: center; justify-content: center; padding: 0 20px; border: 1px solid var(--line); border-radius: 2px; font-size: .9rem; font-weight: 750; text-decoration: none; }
+.button-primary { border-color: var(--ink); background: var(--ink); color: var(--bg); }
+.button-primary:hover { border-color: var(--accent); background: var(--accent); color: #fff; }
+.button-quiet:hover { border-color: var(--ink); }
+.signal-card { position: relative; min-height: 390px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; padding: 32px; border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow); }
+.signal-grid { position: absolute; inset: 0; opacity: .3; background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 32px 32px; mask-image: linear-gradient(to bottom, #000, transparent 80%); }
+.signal-card > *:not(.signal-grid) { position: relative; }
+.signal-label { margin: 0; font: 800 .72rem/1.4 ui-monospace, monospace; letter-spacing: .12em; }
+.signal-path { display: flex; align-items: center; color: var(--accent-2); font: 800 .68rem/1.4 ui-monospace, monospace; }
+.signal-path i { flex: 1; height: 1px; margin: 0 7px; background: currentColor; }
+.signal-card dl { display: grid; grid-template-columns: repeat(3, 1fr); margin: 0; border-top: 1px solid var(--line); }
+.signal-card dl div { padding: 18px 10px 0; border-right: 1px solid var(--line); }
+.signal-card dl div:first-child { padding-left: 0; }
+.signal-card dl div:last-child { border: 0; }
+.signal-card dt { color: var(--muted); font-size: .7rem; }
+.signal-card dd { margin: 3px 0 0; font: 1.65rem Georgia, serif; }
+
+.article-section { padding-block: 110px; }
+.section-heading { display: flex; align-items: end; justify-content: space-between; gap: 40px; margin-bottom: 44px; }
+.section-heading h2 { margin: 0; font: 500 clamp(2.2rem, 4vw, 4rem)/1.1 Georgia, "Songti SC", serif; letter-spacing: -.035em; }
+.section-heading > p { max-width: 330px; margin: 0; color: var(--muted); }
+.post-list { border-top: 1px solid var(--ink); }
+.post-card { position: relative; display: grid; grid-template-columns: 80px 1fr 60px; gap: 28px; padding: 42px 0; border-bottom: 1px solid var(--line); transition: padding .2s ease; }
+.post-card:hover { padding-left: 14px; }
+.card-index { padding-top: 5px; color: var(--accent); font: 800 .78rem/1.4 ui-monospace, monospace; }
+.card-meta { display: flex; gap: 18px; color: var(--muted); font: .72rem ui-monospace, monospace; }
+.card-content h3 { max-width: 850px; margin: 10px 0 12px; font: 500 clamp(1.65rem, 3vw, 2.55rem)/1.25 Georgia, "Songti SC", serif; letter-spacing: -.025em; }
+.card-content h3 a { text-decoration: none; }
+.card-content h3 a:hover { color: var(--accent); }
+.card-content > p { max-width: 760px; margin: 0 0 18px; color: var(--muted); }
+.card-arrow { align-self: center; justify-self: end; width: 45px; height: 45px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 50%; text-decoration: none; }
+.post-card:hover .card-arrow { border-color: var(--accent); background: var(--accent); color: #fff; }
+.tag-list { display: flex; flex-wrap: wrap; gap: 7px; }
+.tag-list span { padding: 4px 9px; border: 1px solid var(--line); border-radius: 99px; color: var(--muted); font-size: .68rem; line-height: 1.4; }
+
+.principles { padding-block: 20px 120px; }
+.principle-grid { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--ink); }
+.principle-grid > div { padding: 32px 34px 0 0; border-right: 1px solid var(--line); }
+.principle-grid > div + div { padding-left: 34px; }
+.principle-grid > div:last-child { border-right: 0; }
+.principle-grid span { color: var(--accent); font: .73rem ui-monospace, monospace; }
+.principle-grid h2 { margin: 15px 0 9px; font: 500 1.55rem/1.3 Georgia, "Songti SC", serif; }
+.principle-grid p { margin: 0; color: var(--muted); font-size: .92rem; }
+
+.post-hero { padding-block: 90px 62px; }
+.back-link { display: inline-block; margin-bottom: 45px; color: var(--muted); font-size: .82rem; text-decoration: none; }
+.back-link:hover { color: var(--accent); }
+.post-kicker { display: flex; gap: 12px; margin-bottom: 20px; color: var(--accent); font: 800 .74rem/1.4 ui-monospace, monospace; letter-spacing: .08em; }
+.post-kicker span + span::before { content: "/"; margin-right: 12px; color: var(--line); }
+.post-hero h1 { margin: 0; font: 500 clamp(2.6rem, 6vw, 5.3rem)/1.08 Georgia, "Songti SC", serif; letter-spacing: -.045em; }
+.post-description { max-width: 720px; margin: 28px 0 0; color: var(--muted); font-size: 1.12rem; }
+.post-meta { display: flex; flex-wrap: wrap; gap: 24px; margin: 28px 0 18px; color: var(--muted); font: .72rem ui-monospace, monospace; }
+.post-body { padding-block: 48px 90px; border-top: 1px solid var(--ink); }
+.post-body > p:first-child { font-size: 1.1rem; }
+.post-body h2, .post-body h3, .post-body h4 { scroll-margin-top: 100px; font-family: Georgia, "Songti SC", serif; font-weight: 550; line-height: 1.3; }
+.post-body h2 { margin: 3.2em 0 .9em; padding-top: .4em; border-top: 1px solid var(--line); font-size: 2rem; letter-spacing: -.025em; }
+.post-body h3 { margin: 2.2em 0 .7em; font-size: 1.4rem; }
+.post-body p, .post-body li { color: color-mix(in srgb, var(--ink) 88%, var(--muted)); }
+.post-body strong { color: var(--ink); }
+.post-body blockquote { margin: 28px 0; padding: 16px 20px; border-left: 3px solid var(--accent); background: var(--surface); color: var(--muted); }
+.post-body blockquote p { margin: 0; color: inherit; }
+.post-body table { width: 100%; margin: 28px 0; border-collapse: collapse; font-size: .88rem; }
+.post-body th, .post-body td { padding: 12px 14px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+.post-body th { background: var(--surface); }
+.post-body pre { overflow-x: auto; margin: 28px 0; padding: 21px 23px; border-radius: 5px; background: var(--code-bg); color: var(--code-ink); font-size: .82rem; line-height: 1.6; }
+.post-body code { padding: .1em .3em; border-radius: 3px; background: var(--surface-strong); font: .88em ui-monospace, SFMono-Regular, Consolas, monospace; }
+.post-body pre code { padding: 0; background: transparent; font-size: inherit; }
+.post-body a { color: var(--accent-2); }
+.series-panel { margin-bottom: 110px; padding: 38px; border: 1px solid var(--line); background: var(--surface); }
+.series-panel h2 { margin: 0 0 20px; font: 500 1.6rem Georgia, "Songti SC", serif; }
+.series-panel ol { margin: 0; padding: 0; list-style: none; }
+.series-panel li { border-top: 1px solid var(--line); }
+.series-panel li a { display: grid; grid-template-columns: 45px 1fr; padding: 13px 0; text-decoration: none; font-size: .88rem; }
+.series-panel li a span { color: var(--accent); font: .72rem ui-monospace, monospace; }
+.series-panel li.current a { color: var(--muted); }
+.series-panel li:not(.current) a:hover { color: var(--accent); }
+
+.about-page { padding-block: 100px 120px; }
+.about-page h1, .not-found h1 { margin: 0 0 35px; font: 500 clamp(3rem, 6vw, 5.5rem)/1.05 Georgia, "Songti SC", serif; letter-spacing: -.045em; }
+.about-page h2 { margin-top: 2.6em; font: 500 1.8rem Georgia, "Songti SC", serif; }
+.about-lede { color: var(--muted); font-size: 1.22rem; }
+.not-found { min-height: 65vh; padding-block: 120px; }
+.not-found p:not(.eyebrow) { margin-bottom: 32px; color: var(--muted); }
+.site-footer { border-top: 1px solid var(--line); }
+.footer-inner { display: flex; justify-content: space-between; gap: 30px; padding-block: 34px; color: var(--muted); font-size: .78rem; }
+.footer-inner p { margin: 0; }
+
+@media (max-width: 860px) {
+  .hero-grid { min-height: auto; grid-template-columns: 1fr; gap: 55px; padding-block: 70px; }
+  .hero-copy h1 { font-size: clamp(3.2rem, 13vw, 5.6rem); }
+  .signal-card { min-height: 330px; }
+  .section-heading { display: block; }
+  .section-heading > p { margin-top: 16px; }
+  .principle-grid { grid-template-columns: 1fr; }
+  .principle-grid > div, .principle-grid > div + div { padding: 26px 0; border-right: 0; border-bottom: 1px solid var(--line); }
+}
+@media (max-width: 620px) {
+  body { font-size: 16px; }
+  .shell, .shell-narrow { width: min(100% - 30px, 1180px); }
+  .header-inner { min-height: 64px; }
+  .brand span { display: none; }
+  .site-nav { gap: 15px; font-size: .8rem; }
+  .site-nav a:nth-child(2) { display: none; }
+  .hero-grid { padding-block: 56px; }
+  .hero-copy h1 { font-size: clamp(2.8rem, 14vw, 4.6rem); }
+  .hero-lede { font-size: 1rem; }
+  .signal-card { padding: 22px; }
+  .article-section { padding-block: 80px; }
+  .post-card { grid-template-columns: 38px 1fr; gap: 10px; padding: 32px 0; }
+  .post-card:hover { padding-left: 0; }
+  .card-arrow { display: none; }
+  .card-content h3 { font-size: 1.55rem; }
+  .post-hero { padding-block: 60px 45px; }
+  .back-link { margin-bottom: 32px; }
+  .post-hero h1 { font-size: clamp(2.25rem, 11vw, 3.5rem); }
+  .post-body { padding-bottom: 65px; }
+  .post-body h2 { font-size: 1.65rem; }
+  .post-body table { display: block; overflow-x: auto; white-space: nowrap; }
+  .series-panel { margin-bottom: 70px; padding: 23px; }
+  .footer-inner { display: block; }
+  .footer-inner p + p { margin-top: 6px; }
+}

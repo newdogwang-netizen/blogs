@@ -1,4 +1,14 @@
-# GPU 进阶笔记（七）：Scale-up 与 Scale-out——NVLink、UALink、PCIe 和 800G 网络
+---
+layout: post
+title: "GPU 进阶笔记（七）：Scale-up 与 Scale-out——NVLink、UALink、PCIe 和 800G 网络"
+description: "拆解 GPU 集群的四层数据路径，厘清 NVLink、UALink、PCIe、InfiniBand、RoCE 和 UEC 的边界。"
+date: 2026-08-27 11:00:00 +0800
+categories: [gpu]
+tags: [NVLink 6, UALink, PCIe 6.0, InfiniBand, RoCE, UEC]
+series: "2026 GPU 进阶笔记"
+series_part: 3
+reading_time: "17 分钟"
+---
 
 > 发布建议日期：2026-08-27  
 > 关键词：NVLink 6、UALink、Infinity Fabric、PCIe 6.0、InfiniBand、RoCE、UEC、AllReduce

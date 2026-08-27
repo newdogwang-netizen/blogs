@@ -1,0 +1,37 @@
+title: "GPU Systems Notes"
+tagline: "理解硬件、互联与系统"
+description: "关于 GPU、AI 基础设施、分布式训练与高性能推理的中文技术笔记。"
+url: "https://newdogwang-netizen.github.io"
+baseurl: "/blogs"
+lang: "zh-CN"
+timezone: "Asia/Shanghai"
+
+author:
+  name: "newdogwang-netizen"
+  url: "https://github.com/newdogwang-netizen"
+
+repository: "newdogwang-netizen/blogs"
+github_username: "newdogwang-netizen"
+
+markdown: kramdown
+highlighter: rouge
+permalink: "/:categories/:title/"
+future: true
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-feed
+
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+      author: "newdogwang-netizen"
+
+exclude:
+  - work
+  - outputs
+  - README.md
+

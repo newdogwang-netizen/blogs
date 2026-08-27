@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="{{ site.lang | default: 'zh-CN' }}" data-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f4f1e8">
+    {% seo %}
+    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+    <link rel="alternate" type="application/atom+xml" title="{{ site.title }}" href="{{ '/feed.xml' | relative_url }}">
+    <script>
+      (function () {
+        var saved = localStorage.getItem('theme');
+        var preferred = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = saved || preferred;
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="reading-progress" aria-hidden="true"><span></span></div>
+    <header class="site-header">
+      <div class="shell header-inner">
+        <a class="brand" href="{{ '/' | relative_url }}" aria-label="返回首页">
+          <svg class="brand-mark" viewBox="0 0 40 40" role="img" aria-hidden="true">
+            <circle cx="20" cy="20" r="5"></circle>
+            <ellipse cx="20" cy="20" rx="17" ry="8"></ellipse>
+            <ellipse cx="20" cy="20" rx="8" ry="17" transform="rotate(38 20 20)"></ellipse>
+          </svg>
+          <span><strong>GPU</strong> Systems Notes</span>
+        </a>
+        <nav class="site-nav" aria-label="主导航">
+          <a href="{{ '/' | relative_url }}">文章</a>
+          <a href="{{ '/about/' | relative_url }}">关于</a>
+          <a href="https://github.com/{{ site.github_username }}/blogs" target="_blank" rel="noopener">GitHub</a>
+          <button class="theme-toggle" type="button" aria-label="切换明暗主题" title="切换明暗主题"><span aria-hidden="true">◐</span></button>
+        </nav>
+      </div>
+    </header>
+
+    <main id="content">{{ content }}</main>
+
+    <footer class="site-footer">
+      <div class="shell footer-inner">
+        <p>把峰值参数还原成真实系统。</p>
+        <p>© {{ 'now' | date: '%Y' }} {{ site.author.name }} · <a href="{{ '/feed.xml' | relative_url }}">RSS</a></p>
+      </div>
+    </footer>
+    <script src="{{ '/assets/js/site.js' | relative_url }}" defer></script>
+  </body>
+</html>
+
