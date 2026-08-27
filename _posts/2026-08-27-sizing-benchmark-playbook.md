@@ -1,13 +1,13 @@
 ---
 layout: post
-title: "GPU 进阶笔记（八）：从 SLO 反推 GPU 集群——容量、并行、排队与验收"
+title: "GPU 进阶笔记（六）：从 SLO 反推 GPU 集群——容量、并行、排队与验收"
 description: "一套面向生产的反向设计方法：从请求分布和训练期限出发，推导 HBM、并行度、网络预算、尾延迟和故障恢复。"
 date: 2026-08-27 12:00:00 +0800
 categories: [ai-gpu]
 category_name: "AI 与 GPU"
 tags: [容量规划, GPU 集群, NCCL, MLPerf, 推理 SLO, TCO]
 series: "2026 GPU 进阶笔记"
-series_part: 4
+series_part: 6
 reading_time: "34 分钟"
 ---
 

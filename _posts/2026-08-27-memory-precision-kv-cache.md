@@ -1,13 +1,13 @@
 ---
 layout: post
-title: "GPU 进阶笔记（六）：从 Roofline 推导 HBM、FP4 与 KV Cache 的真实上限"
+title: "GPU 进阶笔记（四）：从 Roofline 推导 HBM、FP4 与 KV Cache 的真实上限"
 description: "不再停留于‘显存更大、位宽更低’：逐项推导 prefill/decode 的算术强度、有效位宽、KV 容量和训练状态。"
 date: 2026-08-27 10:00:00 +0800
 categories: [ai-gpu]
 category_name: "AI 与 GPU"
 tags: [Roofline, HBM4, NVFP4, MXFP4, KV Cache, FlashAttention]
 series: "2026 GPU 进阶笔记"
-series_part: 2
+series_part: 4
 reading_time: "29 分钟"
 ---
 

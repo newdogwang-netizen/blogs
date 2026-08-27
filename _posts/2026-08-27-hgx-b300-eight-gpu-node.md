@@ -1,13 +1,13 @@
 ---
 layout: post
-title: "GPU 进阶笔记（五·前篇）：HGX B300——8-GPU 节点为什么仍是主流边界"
+title: "GPU 进阶笔记（一）：HGX B300——8-GPU 节点为什么仍是主流边界"
 description: "拆解 HGX B300 baseboard、双 NVSwitch、1:1 ConnectX-8、双平面网络与 DGX B300 整机，解释它相对 NVL72 更现实的部署边界。"
 date: 2026-08-27 13:00:00 +0800
 categories: [ai-gpu]
 category_name: "AI 与 GPU"
 tags: [HGX B300, Blackwell Ultra, NVSwitch, ConnectX-8, DGX B300]
 series: "2026 GPU 进阶笔记"
-series_part: 0
+series_part: 1
 reading_time: "32 分钟"
 ---
 

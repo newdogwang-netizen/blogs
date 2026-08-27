@@ -1,13 +1,13 @@
 ---
 layout: post
-title: "GPU 进阶笔记（七）：Scale-up 与 Scale-out——从链路语义到 Collective 成本"
+title: "GPU 进阶笔记（五）：Scale-up 与 Scale-out——从链路语义到 Collective 成本"
 description: "把 PCIe、NVLink、UALink、InfiniBand/RoCE 放回真实数据路径，并推导 Ring、Tree、All-to-All 与 rail topology 的性能边界。"
 date: 2026-08-27 11:00:00 +0800
 categories: [ai-gpu]
 category_name: "AI 与 GPU"
 tags: [NVLink, UALink, PCIe 6.0, NCCL, AllReduce, RoCE]
 series: "2026 GPU 进阶笔记"
-series_part: 3
+series_part: 5
 reading_time: "31 分钟"
 ---
 

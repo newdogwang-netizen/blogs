@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1040" role="img" aria-labelledby="title desc">
+  <title id="title">18节点HGX B300双平面集群拓扑</title>
+  <desc id="desc">十八台HGX B300组成四个完整四节点SU和一个两节点部分SU，分别连接两套四叶两脊计算网络、两台南北向交换机和四台带外管理交换机。</desc>
+  <defs>
+    <style>
+      .bg{fill:#f7f4eb}.box{fill:#fff;stroke:#242820;stroke-width:2}.su{fill:#fdfbf5;stroke:#8b8f83;stroke-width:2}.aBox{fill:#fff0e9;stroke:#dc5428;stroke-width:2}.bBox{fill:#eaf4ef;stroke:#176b58;stroke-width:2}.mBox{fill:#eef1f7;stroke:#4e668f;stroke-width:2}.warn{fill:#fff7d9;stroke:#a77b00;stroke-width:2}.t{font-family:Inter,"Microsoft YaHei",sans-serif;fill:#171914}.h1{font-size:34px;font-weight:700}.h2{font-size:21px;font-weight:700}.body{font-size:16px}.small{font-size:13px;fill:#5d6258}.a{stroke:#dc5428;stroke-width:4;fill:none}.b{stroke:#176b58;stroke-width:4;fill:none}.m{stroke:#4e668f;stroke-width:3;fill:none}.thin{stroke-width:2}.dash{stroke-dasharray:8 7}
+    </style>
+    <marker id="aa" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#dc5428"/></marker>
+    <marker id="ab" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#176b58"/></marker>
+    <marker id="am" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#4e668f"/></marker>
+  </defs>
+  <rect class="bg" width="1600" height="1040" rx="20"/>
+  <text class="t h1" x="55" y="58">18 × HGX B300：按官方32节点双平面架构缩配</text>
+  <text class="t small" x="55" y="87">官方事实：4节点/SU、32/64/128节点参考设计　｜　本文映射：4个完整SU + 1个2节点partial SU</text>
+
+  <text class="t h2" x="190" y="132" text-anchor="middle">Compute Nodes</text>
+  <g>
+    <rect class="su" x="45" y="155" width="290" height="115" rx="12"/>
+    <text class="t h2" x="190" y="188" text-anchor="middle">SU 01 · Nodes 01–04</text>
+    <text class="t body" x="190" y="219" text-anchor="middle">32 GPU · 32 CX-8</text>
+    <text class="t small" x="190" y="246" text-anchor="middle">每plane 32×400G</text>
+    <rect class="su" x="45" y="286" width="290" height="115" rx="12"/>
+    <text class="t h2" x="190" y="319" text-anchor="middle">SU 02 · Nodes 05–08</text>
+    <text class="t body" x="190" y="350" text-anchor="middle">32 GPU · 32 CX-8</text>
+    <text class="t small" x="190" y="377" text-anchor="middle">每plane 32×400G</text>
+    <rect class="su" x="45" y="417" width="290" height="115" rx="12"/>
+    <text class="t h2" x="190" y="450" text-anchor="middle">SU 03 · Nodes 09–12</text>
+    <text class="t body" x="190" y="481" text-anchor="middle">32 GPU · 32 CX-8</text>
+    <text class="t small" x="190" y="508" text-anchor="middle">每plane 32×400G</text>
+    <rect class="su" x="45" y="548" width="290" height="115" rx="12"/>
+    <text class="t h2" x="190" y="581" text-anchor="middle">SU 04 · Nodes 13–16</text>
+    <text class="t body" x="190" y="612" text-anchor="middle">32 GPU · 32 CX-8</text>
+    <text class="t small" x="190" y="639" text-anchor="middle">每plane 32×400G</text>
+    <rect class="warn" x="45" y="679" width="290" height="115" rx="12"/>
+    <text class="t h2" x="190" y="712" text-anchor="middle">Partial SU · Nodes 17–18</text>
+    <text class="t body" x="190" y="743" text-anchor="middle">16 GPU · 16 CX-8</text>
+    <text class="t small" x="190" y="770" text-anchor="middle">非官方标准SU；为扩到20/32预留</text>
+  </g>
+
+  <rect class="aBox" x="405" y="125" width="695" height="340" rx="16"/>
+  <text class="t h2" x="435" y="160">Compute Plane A · 144×400G endpoints</text>
+  <text class="t small" x="435" y="184">物理独立 · 57.6Tb/s endpoint line rate · 4 Leaf + 2 Spine</text>
+  <g>
+    <rect class="aBox" x="440" y="220" width="135" height="88" rx="9"/><text class="t body" x="507" y="251" text-anchor="middle">Leaf A1</text><text class="t small" x="507" y="279" text-anchor="middle">Rail 1 + 5</text>
+    <rect class="aBox" x="595" y="220" width="135" height="88" rx="9"/><text class="t body" x="662" y="251" text-anchor="middle">Leaf A2</text><text class="t small" x="662" y="279" text-anchor="middle">Rail 2 + 6</text>
+    <rect class="aBox" x="750" y="220" width="135" height="88" rx="9"/><text class="t body" x="817" y="251" text-anchor="middle">Leaf A3</text><text class="t small" x="817" y="279" text-anchor="middle">Rail 3 + 7</text>
+    <rect class="aBox" x="905" y="220" width="135" height="88" rx="9"/><text class="t body" x="972" y="251" text-anchor="middle">Leaf A4</text><text class="t small" x="972" y="279" text-anchor="middle">Rail 4 + 8</text>
+    <rect class="box" x="570" y="365" width="175" height="62" rx="9"/><text class="t body" x="657" y="402" text-anchor="middle">Spine A1</text>
+    <rect class="box" x="785" y="365" width="175" height="62" rx="9"/><text class="t body" x="872" y="402" text-anchor="middle">Spine A2</text>
+    <path class="a thin" d="M507 308V338H960M662 308V338M817 308V338M972 308V338M657 338V362M872 338V362"/>
+  </g>
+
+  <rect class="bBox" x="405" y="500" width="695" height="340" rx="16"/>
+  <text class="t h2" x="435" y="535">Compute Plane B · 144×400G endpoints</text>
+  <text class="t small" x="435" y="559">与Plane A设备、链路和故障域完全隔离</text>
+  <g>
+    <rect class="bBox" x="440" y="595" width="135" height="88" rx="9"/><text class="t body" x="507" y="626" text-anchor="middle">Leaf B1</text><text class="t small" x="507" y="654" text-anchor="middle">Rail 1 + 5</text>
+    <rect class="bBox" x="595" y="595" width="135" height="88" rx="9"/><text class="t body" x="662" y="626" text-anchor="middle">Leaf B2</text><text class="t small" x="662" y="654" text-anchor="middle">Rail 2 + 6</text>
+    <rect class="bBox" x="750" y="595" width="135" height="88" rx="9"/><text class="t body" x="817" y="626" text-anchor="middle">Leaf B3</text><text class="t small" x="817" y="654" text-anchor="middle">Rail 3 + 7</text>
+    <rect class="bBox" x="905" y="595" width="135" height="88" rx="9"/><text class="t body" x="972" y="626" text-anchor="middle">Leaf B4</text><text class="t small" x="972" y="654" text-anchor="middle">Rail 4 + 8</text>
+    <rect class="box" x="570" y="740" width="175" height="62" rx="9"/><text class="t body" x="657" y="777" text-anchor="middle">Spine B1</text>
+    <rect class="box" x="785" y="740" width="175" height="62" rx="9"/><text class="t body" x="872" y="777" text-anchor="middle">Spine B2</text>
+    <path class="b thin" d="M507 683V713H960M662 683V713M817 683V713M972 683V713M657 713V737M872 713V737"/>
+  </g>
+
+  <path class="a" marker-end="url(#aa)" d="M335 390H375V292H402"/>
+  <path class="b" marker-end="url(#ab)" d="M335 520H375V670H402"/>
+  <text class="t small" x="365" y="370" transform="rotate(-90 365 370)">每节点8×400G</text>
+
+  <rect class="mBox" x="1160" y="125" width="390" height="230" rx="16"/>
+  <text class="t h2" x="1190" y="161">Converged North/South</text>
+  <rect class="mBox" x="1195" y="195" width="145" height="60" rx="9"/><text class="t body" x="1267" y="232" text-anchor="middle">N/S Switch 1</text>
+  <rect class="mBox" x="1370" y="195" width="145" height="60" rx="9"/><text class="t body" x="1442" y="232" text-anchor="middle">N/S Switch 2</text>
+  <text class="t small" x="1355" y="289" text-anchor="middle">18×BlueField-3 → 36×400G</text>
+  <text class="t small" x="1355" y="319" text-anchor="middle">Storage · Customer · In-band Mgmt</text>
+
+  <rect class="mBox" x="1160" y="395" width="390" height="190" rx="16"/>
+  <text class="t h2" x="1190" y="431">Storage &amp; Control</text>
+  <text class="t body" x="1190" y="473">Storage target ≥ 225GB/s aggregate</text>
+  <text class="t body" x="1190" y="508">BCM HA · Slurm HA · K8s control</text>
+  <text class="t body" x="1190" y="543">Registry · Login · DNS/NTP · Telemetry</text>
+
+  <rect class="mBox" x="1160" y="625" width="390" height="215" rx="16"/>
+  <text class="t h2" x="1190" y="661">Out-of-Band Management</text>
+  <rect class="mBox" x="1190" y="697" width="70" height="54" rx="8"/><text class="t small" x="1225" y="729" text-anchor="middle">OOB 1</text>
+  <rect class="mBox" x="1280" y="697" width="70" height="54" rx="8"/><text class="t small" x="1315" y="729" text-anchor="middle">OOB 2</text>
+  <rect class="mBox" x="1370" y="697" width="70" height="54" rx="8"/><text class="t small" x="1405" y="729" text-anchor="middle">OOB 3</text>
+  <rect class="mBox" x="1460" y="697" width="70" height="54" rx="8"/><text class="t small" x="1495" y="729" text-anchor="middle">OOB 4</text>
+  <text class="t small" x="1355" y="789" text-anchor="middle">约108×1G node mgmt endpoints</text>
+  <text class="t small" x="1355" y="815" text-anchor="middle">最终端口数以OEM系统为准</text>
+
+  <path class="m" marker-end="url(#am)" d="M335 735H1115V240H1157"/>
+  <path class="m" marker-end="url(#am)" d="M1355 355V392"/>
+  <path class="m" marker-end="url(#am)" d="M1115 735H1157"/>
+
+  <rect class="warn" x="405" y="890" width="1145" height="95" rx="12"/>
+  <text class="t h2" x="435" y="926">设计边界</text>
+  <text class="t body" x="435" y="958">交换机数量沿用官方32节点逻辑；18节点端口、光模块、uplink与oversubscription必须由NVIDIA/OEM按具体交换机SKU签字确认。</text>
+  <text class="t small" x="800" y="1012" text-anchor="middle">生成图：依据NVIDIA HGX AI Factory 4-node SU与32-node dual-plane reference architecture重绘</text>
+</svg>

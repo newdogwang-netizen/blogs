@@ -115,6 +115,10 @@ img { max-width: 100%; }
 .post-body code { padding: .1em .3em; border-radius: 3px; background: var(--surface-strong); font: .88em ui-monospace, SFMono-Regular, Consolas, monospace; }
 .post-body pre code { padding: 0; background: transparent; font-size: inherit; }
 .post-body a { color: var(--accent-2); }
+.architecture-figure { margin: 34px 0; }
+.architecture-figure a { display: block; overflow: hidden; border: 1px solid var(--line); border-radius: 6px; background: #f7f4eb; }
+.architecture-figure img { display: block; width: 100%; height: auto; }
+.architecture-figure figcaption { margin-top: 10px; color: var(--muted); font-size: .78rem; line-height: 1.55; text-align: center; }
 .series-panel { margin-bottom: 110px; padding: 38px; border: 1px solid var(--line); background: var(--surface); }
 .series-panel h2 { margin: 0 0 20px; font: 500 1.6rem Georgia, "Songti SC", serif; }
 .series-panel ol { margin: 0; padding: 0; list-style: none; }
