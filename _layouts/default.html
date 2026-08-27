@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#f4f1e8">
     {% seo %}
-    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}?v={{ site.github.build_revision }}">
     <link rel="alternate" type="application/atom+xml" title="{{ site.title }}" href="{{ '/feed.xml' | relative_url }}">
     <script>
       (function () {
@@ -44,7 +44,6 @@
         <p>© {{ 'now' | date: '%Y' }} {{ site.author.name }} · <a href="{{ '/feed.xml' | relative_url }}">RSS</a></p>
       </div>
     </footer>
-    <script src="{{ '/assets/js/site.js' | relative_url }}" defer></script>
+    <script src="{{ '/assets/js/site.js' | relative_url }}?v={{ site.github.build_revision }}" defer></script>
   </body>
 </html>
-
