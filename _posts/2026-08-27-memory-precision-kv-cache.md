@@ -1,206 +1,319 @@
 ---
 layout: post
-title: "GPU 进阶笔记（六）：HBM4、FP4 与 KV Cache——算力数字为什么经常骗人"
-description: "用 Roofline、权重容量和 KV Cache 公式解释：为什么峰值 FLOPS 很高，真实模型却未必更快。"
+title: "GPU 进阶笔记（六）：从 Roofline 推导 HBM、FP4 与 KV Cache 的真实上限"
+description: "不再停留于‘显存更大、位宽更低’：逐项推导 prefill/decode 的算术强度、有效位宽、KV 容量和训练状态。"
 date: 2026-08-27 10:00:00 +0800
 categories: [ai-gpu]
 category_name: "AI 与 GPU"
-tags: [HBM4, FP4, MXFP4, KV Cache, Roofline]
+tags: [Roofline, HBM4, NVFP4, MXFP4, KV Cache, FlashAttention]
 series: "2026 GPU 进阶笔记"
 series_part: 2
-reading_time: "16 分钟"
+reading_time: "29 分钟"
 ---
 
-> 发布建议日期：2026-08-27  
-> 关键词：HBM3e、HBM4、Roofline、FP8、FP4、MXFP4、KV Cache、推理
+> 资料状态：2026-08-27。文中的上限都是用于定位瓶颈的模型，不是产品性能承诺。
 
-同一张 GPU 的宣传页上，FP4 峰值可能比 BF16 高很多；但把模型精度从 BF16 改成 FP4，端到端吞吐并不会自动按相同比例增长。
+低精度宣传常把三件不同的事压成一个数字：Tensor Core 每秒能做多少乘加、HBM 每秒能搬多少字节、模型在质量约束下实际能使用什么格式。三者没有同时对齐时，“FP4 是 BF16 的四倍”没有端到端含义。
 
-原因是 GPU 性能至少受三个上限约束：计算、显存带宽、通信。2026 年尤其需要理解后两者。
+本文从最小性能模型开始，把权重、KV Cache、激活和通信一层层加回来。目标是看到一个 GPU 规格后，可以自行推断它更可能改善 prefill、decode、长上下文并发，还是训练容量。
 
-## 1. 从一个最小 Roofline 模型开始
+## 1. Roofline 不是一张图，而是一个判定式
 
-定义算术强度：
-
-```text
-Arithmetic Intensity = 运算量 FLOPs / 从 HBM 搬运的字节数 Bytes
-```
-
-可达到的性能上限近似为：
+定义算术强度 `I`：
 
 ```text
-Achievable FLOPS <= min(
-  峰值计算吞吐,
-  HBM 带宽 × Arithmetic Intensity
-)
+I = 实际执行的 FLOP / 从目标内存层实际搬运的 byte
 ```
 
-- 大 batch 的矩阵乘法复用率高，更容易接近计算上限。
-- 单 token decode 需要反复读取大量权重，算术强度低，常常受 HBM 带宽限制。
-- MoE 的专家路由可能受 GPU 间互联限制。
+若 GPU 的计算峰值是 `P_peak`，HBM 持续带宽是 `BW_HBM`，则：
 
-所以，“FP4 算力翻倍”只说明计算屋顶变高；若工作负载已经撞在内存屋顶或网络屋顶上，实际速度不会翻倍。
+```text
+P_attainable ≤ min(P_peak, BW_HBM × I)
+```
 
-## 2. HBM 代际：容量和带宽同样重要
+两条屋顶相交处称为 machine balance：
 
-| 代表产品 | 每 GPU HBM | 每 GPU 峰值 HBM 带宽 | 状态口径 |
+```text
+I_ridge = P_peak / BW_HBM   [FLOP/byte]
+```
+
+- `I < I_ridge`：即使计算单元无限快，也受 HBM 限制；
+- `I > I_ridge`：数据复用足够高，才可能进入计算受限区；
+- 正好越过交点也不等于到达峰值，还受 shape、occupancy、调度和非 Tensor Core 算子影响。
+
+这里的 byte 必须针对正确内存层。数据若在 L2 命中，就不应重复计入 HBM；若跨 GPU 读取，又要增加 fabric roof。现代 GPU 实际上是多层 Roofline：
+
+```text
+compute roof
+  min with register/shared-memory roof
+  min with L2 roof
+  min with HBM roof
+  min with scale-up / scale-out roof
+```
+
+## 2. 为什么 prefill 与 decode 像两种不同的工作负载
+
+对含 `P` 个 dense 参数的 Transformer，忽略 embedding 等细节，一 token 前向大约执行 `2P` FLOP。差别在于同一批权重能服务多少 token。
+
+假设每个 decode step 同时处理 `B` 个序列，每参数有效存储 `b` byte，且权重理想地只从 HBM 读取一次：
+
+```text
+FLOP per step   ≈ 2P × B
+weight bytes    ≈ P × b
+I_weight        ≈ 2B / b  FLOP/byte
+```
+
+于是：
+
+| 权重格式 | `b` 的理想值 | `I_weight` |
+|---|---:|---:|
+| BF16 | 2 B | `B` FLOP/B |
+| FP8 | 1 B | `2B` FLOP/B |
+| 4 bit（暂不计 scale） | 0.5 B | `4B` FLOP/B |
+
+单请求 decode 的 `B=1` 时，哪怕 4 bit 也只有约 4 FLOP/B，通常远低于现代 Tensor Core/HBM 的 machine balance。它天然偏带宽受限。
+
+prefill 则一次把长 prompt 的很多 token 组成大矩阵，权重被大量 token 复用，`B` 可理解为远大的 token batch，算术强度迅速提高。因此同一张卡可能出现：
+
+- prefill 接近计算受限，低精度 Tensor FLOPS 很重要；
+- decode 仍受 HBM/collective 限制，更高 FLOPS 贡献有限；
+- 增大 continuous batch 能提高 decode 吞吐，但排队和 token 间延迟会恶化。
+
+这就是吞吐与延迟的第一组根本冲突。
+
+## 3. HBM 容量和带宽解决的是两个正交问题
+
+| 代表 GPU | HBM 容量/GPU | 峰值带宽/GPU | 主要意义 |
 |---|---:|---:|---|
-| H200 | 141GB HBM3e | 4.8TB/s | 已量产 |
-| B200 | 180GB HBM3e | 最高 8TB/s | 已量产 |
-| B300 / MI355X | 288GB HBM3e | 最高 8TB/s | 已量产 |
-| Rubin | 288GB HBM4 | 最高 22TB/s | 2026 初步规格 |
-| MI455X | 432GB HBM4 | 23.3TB/s | 2026 已发布规格 |
+| H200 | 141GB HBM3e | 4.8TB/s | 更大的 Hopper 容量边界 |
+| B300 / MI355X | 288GB HBM3e | 最高 8TB/s | 少切分权重或容纳更多 KV |
+| Rubin | 288GB HBM4 | 初步规格最高 22TB/s | 容量不增、带宽大增 |
+| MI455X | 432GB HBM4 | 23.3TB/s | 更大单卡容量与 HBM4 带宽 |
 
-NVIDIA 三代数据见 [HGX 参考架构](https://docs.nvidia.com/enterprise-reference-architectures/hgx-ai-factory/latest/components.html)，Rubin 见 [架构技术文章](https://developer.nvidia.com/blog/inside-the-nvidia-rubin-platform-six-new-chips-one-ai-supercomputer/)，AMD 见 [MI400 产品页](https://www.amd.com/en/products/accelerators/instinct/mi400.html)。
+容量决定“能不能放下”和“能并发多少”；带宽决定“每轮多久能读完”。容量增加还可能间接减少 tensor parallel degree，从而少做 collective。带宽增加则主要缩短每次数据流动，不会让放不下的模型突然放下。
 
-这里有两个趋势：
+因此不能用 `GB × TB/s` 之类自创乘积比较 GPU。两个轴要分别进入容量模型和时间模型。
 
-1. HBM4 不只是更快，也允许更大的单卡容量；
-2. 容量增长可以减少模型切分，带宽增长可以加快每次读取，两者解决的问题不同。
+来源：[NVIDIA HGX Components](https://docs.nvidia.com/enterprise-reference-architectures/hgx-ai-factory/latest/components.html)与 [AMD CDNA Architecture](https://www.amd.com/en/technologies/cdna.html)。
 
-## 3. 先算权重能否放下
+## 4. “4 bit 权重占 35GB”为什么只是一阶近似
 
-最粗略的推理权重容量：
+裸权重大小是：
 
 ```text
-权重字节数 ≈ 参数量 × 每参数字节数
+W_raw = parameter_count × payload_bits / 8
 ```
 
-以 70B 参数为例：
+70B 参数在纯 4 bit payload 下确实是 `70×10^9×4/8 = 35GB`。但可计算格式需要 scale、分块、对齐，有时还有 zero point。
 
-| 权重精度 | 理论权重大小 |
-|---|---:|
-| BF16 / FP16 | 140GB |
-| FP8 / INT8 | 70GB |
-| 4 bit | 35GB |
+### 4.1 MXFP4 的有效位宽
 
-这只是裸权重。实际部署还需要：
-
-- 量化 scale、zero point 和对齐填充；
-- KV Cache；
-- CUDA/ROCm context、通信 buffer 和算子 workspace；
-- 激活与临时张量；
-- 碎片和安全余量。
-
-因此，“70B BF16 是 140GB，所以 141GB H200 刚好单卡能跑”是错误的工程结论。容量规划需要预留余量，通常还要根据推理引擎实测。
-
-## 4. KV Cache 为什么在长上下文时代变成主角
-
-对采用 GQA/MQA 的 Transformer，一层、一个 token 的 K/V 大小可近似为：
+OCP MXFP4 使用 E2M1 四位元素，每 32 个元素共享一个 8-bit E8M0 scale。忽略对齐：
 
 ```text
-KV bytes/token
-  = 2 × layers × kv_heads × head_dim × bytes_per_element
+effective bits/value = 4 + 8/32 = 4.25 bit
+70B 参数 ≈ 70e9 × 4.25/8 = 37.19GB
 ```
 
-其中前面的 2 表示 Key 和 Value。
+E8M0 scale 是 2 的幂，解码便宜、格式规整，但 scale 没有尾数，粒度相对粗。
 
-假设一个模型有：80 层、8 个 KV heads、head_dim=128，KV 使用 BF16：
+### 4.2 NVFP4 的有效位宽
+
+NVFP4 使用 E2M1 元素，每 16 个元素共享一个 E4M3 FP8 scale，另外有 tensor-level FP32 scale：
 
 ```text
-2 × 80 × 8 × 128 × 2 bytes
-= 327,680 bytes/token
-= 320 KiB/token
+effective bits/value ≈ 4 + 8/16 = 4.5 bit
+70B 参数 ≈ 70e9 × 4.5/8 = 39.38GB
 ```
 
-单条 128K 上下文的 KV Cache：
+更小的 block 降低离群值污染范围，E4M3 scale 也能表达非 2 次幂缩放；代价是 scale 开销更高。每 tensor 的 FP32 scale 对大张量可忽略，但小张量、padding 与存储布局不能忽略。
+
+所以 NVFP4 的优势不能写成“比 4 bit 还小”。它用略高的有效位宽换取更细的缩放与质量；NVIDIA 所说约 3.5× 相对 FP16 的节省，与 `16/4.5≈3.56` 正好一致。
+
+来源：[OCP Microscaling Formats v1.0](https://www.opencompute.org/documents/ocp-microscaling-formats-mx-v1-0-spec-final-pdf)与 [NVIDIA NVFP4 技术说明](https://developer.nvidia.com/blog/introducing-nvfp4-for-efficient-and-accurate-low-precision-inference/)。
+
+## 5. 量化误差为什么不能只看 bit 数
+
+对一个 block，量化过程可抽象为：
 
 ```text
-320 KiB × 131,072 ≈ 40 GiB
+q_i = round_to_format(x_i / s)
+x̂_i = q_i × s
 ```
 
-若有 32 条同样长度的并发请求，未压缩 KV 理论上约为 1.25TiB。这还没有计入权重和运行时空间。
+误差来源至少有：
 
-这解释了为什么 2026 年推理平台同时追求：
+1. **clip error**：`x_i/s` 超过格式动态范围；
+2. **rounding error**：相邻可表示值间距太大；
+3. **scale error**：共享 scale 由 block 的统计量决定；
+4. **accumulation error**：乘积虽低精度，累加路径仍有自己的精度；
+5. **outlier propagation**：激活离群值让整个 block 的普通值失去分辨率。
 
-- 更大的 HBM；
-- 低精度 KV Cache（具体位宽与支持情况取决于模型和推理引擎）；
-- PagedAttention，减少碎片；
-- prefix caching，复用公共前缀；
-- disaggregated prefill/decode，把不同阶段放到不同资源池；
-- 更快的 scale-up fabric，让 KV 或专家可以跨 GPU 分布。
+block 越小，离群值影响越局部，但 scale 元数据与缩放操作越多；block 越大，吞吐更容易做高，量化误差通常更难控制。这是精度格式设计的核心权衡。
 
-## 5. FP8、FP6、FP4 不是一个简单的“位数开关”
-
-### 5.1 为什么低精度需要 scale
-
-位数越少，可表示的动态范围和精度越有限。若整块张量只共享一个 scale，离群值会浪费大量表示范围。因此 2026 年常见的方向是 microscaling：把张量切成小 block，每个 block 使用自己的 scale。
-
-OCP 的 MX 规范定义了 MXFP8、MXFP6、MXFP4 和 MXINT8 等格式。它规定交换格式和基本操作，但没有规定所有训练/推理软件必须使用同一种量化算法。参见 [OCP Microscaling Formats v1.0](https://www.opencompute.org/documents/ocp-microscaling-formats-mx-v1-0-spec-final-pdf)。
-
-### 5.2 相同“FP4”标签也未必可直接比较
-
-- NVIDIA 常见 NVFP4；
-- AMD CDNA 4/5 支持 OCP MXFP4 等格式；
-- 不同实现可能使用不同 block size、scale 表示、累加精度和稀疏性口径；
-- 峰值表格可能包含结构化稀疏，也可能是 dense。
-
-因此跨厂商比较时至少要对齐：
+因此比较 FP4 实现要同时写明：
 
 ```text
-数据格式 + dense/sparse + 输入形状 + 累加精度
-+ 准确率目标 + 功耗 + 软件版本
+element format + scale format + block size + rounding
++ accumulation precision + dense/sparse + quality metric
 ```
 
-如果这些条件没写全，“40 PFLOPS > 35 PFLOPS”几乎没有采购意义。
+只写“支持 FP4”无法复现实验。
 
-## 6. 训练和推理对精度的容忍度不同
+## 6. KV Cache：容量公式只是开始
 
-### 6.1 推理
-
-权重量化到 8 bit 或 4 bit 已很常见，但能否保持质量取决于模型、层类型、校准数据和量化方法。通常：
-
-- 权重容易降精度；
-- 激活对离群值更敏感；
-- KV Cache 可以独立选择精度；
-- softmax、归一化、累加等环节常保留更高精度。
-
-### 6.2 训练
-
-训练不仅要存权重，还要存梯度、优化器状态、master weights 和激活。一个常见的 Adam 混合精度粗估是每参数十几字节，而不是 2 字节；具体值取决于是否使用 BF16 master weight、优化器实现、ZeRO/FSDP 分片和激活重计算。
-
-低精度训练也通常是混合精度：矩阵乘使用 FP8/FP6/FP4，累加和部分敏感算子保留 BF16/FP32。不能把“支持 FP4 training”理解成所有张量始终只有 4 bit。
-
-## 7. 用带宽估算 decode 的理论上限
-
-做一个故意简化的下界估算：假设 70B 模型以 4 bit 保存，裸权重约 35GB；每生成一个 token，至少把权重从 HBM 读一遍；忽略 KV、激活、算子开销和带宽利用率。
+对 GQA/MQA Transformer，不计 padding，一 token 的 KV 大小近似：
 
 ```text
-tokens/s 上限 ≈ HBM GB/s / 权重 GB
+KV_bytes/token
+  = 2 × n_layers × n_kv_heads × head_dim × bytes/element
 ```
 
-| GPU HBM 带宽 | 极理想单流上限 |
+其中 2 代表 K 和 V。若模型有 80 层、8 个 KV head、head dimension 128，KV 使用 BF16：
+
+```text
+2 × 80 × 8 × 128 × 2 = 327,680 bytes/token = 320KiB/token
+```
+
+于是：
+
+```text
+128Ki tokens/request × 320KiB/token = 40GiB/request
+32 concurrent requests              = 1.25TiB
+```
+
+### 6.1 工程容量还要乘三个系数
+
+实际预留可写成：
+
+```text
+KV_reserved = KV_live
+              × block_padding_factor
+              × scheduler_headroom
+              + metadata
+```
+
+- PagedAttention 以固定 block 分配，最后一个 block 会产生内部碎片；
+- 请求长度分布和抢占策略要求调度余量；
+- block table、引用计数和 prefix cache 索引也占空间；
+- beam search、speculative decoding 会改变同时存活的分支数；
+- tensor/context parallel 会改变每 rank 实际持有的 head 或 sequence 分片。
+
+不能用“平均上下文 × 平均并发”做峰值容量。调度器遇到长尾请求时，平均数会掩盖 OOM。
+
+### 6.2 KV 不只是占容量，也消耗每 token 带宽
+
+标准 attention 在 decode 第 `L` 个 token 时，要读取此前约 `L` 个 token 的 K/V。单层读取量随上下文长度线性增长：
+
+```text
+KV_read_per_new_token ≈ L × KV_bytes/token
+```
+
+以上述模型、`L=128Ki` 为例，完整层集合的 KV 存量是 40GiB。实际 kernel 会分层读取，且 GQA、分片和 cache 命中改变路径，但总量说明长上下文 decode 可能从“读取权重受限”进一步变成“权重 + KV 共同带宽受限”。
+
+KV 量化因此同时带来容量和带宽收益，但必须评估 attention 输出误差随上下文和任务的累积，不能只看短 benchmark。
+
+## 7. FlashAttention 解决的是 IO 复杂度，不是让 HBM 消失
+
+朴素 attention 会显式物化 `N×N` score matrix，再写回和读出 HBM。FlashAttention 把 Q/K/V 分块装入片上 SRAM，在线维护 softmax 的局部最大值和归一化项，从而避免完整 `N×N` 中间矩阵落到 HBM。
+
+关键不是 FLOP 变少，而是 HBM IO 显著减少：
+
+```text
+naive:  materialize S = QKᵀ, P = softmax(S), then PV
+tiled:  stream K/V blocks, keep partial softmax state on chip
+```
+
+它仍要读取 Q/K/V 和写出结果；decode 时历史 KV 仍需被访问。FlashAttention 抬高了有效算术强度，却没有取消长上下文的线性 KV 流量。
+
+原论文：[FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness](https://arxiv.org/abs/2205.14135)。
+
+## 8. 用 HBM 带宽推导 decode 的绝对上界
+
+若忽略 KV、激活、通信和一切开销，并假设每生成一个 token 至少从 HBM 流式读取一次权重：
+
+```text
+tokens/s ≤ sustainable_HBM_bandwidth / effective_weight_bytes
+```
+
+对 70B NVFP4，按 4.5 bit 约 39.38GB：
+
+| 峰值 HBM 带宽 | 使用峰值直接相除的上限 |
 |---:|---:|
-| 8TB/s | 约 229 token/s |
-| 22TB/s | 约 629 token/s |
+| 8TB/s | 约 203 token/s |
+| 22TB/s | 约 559 token/s |
+| 23.3TB/s | 约 592 token/s |
 
-现实值会低得多，因为：
+以前用 35GB 裸 payload 会得到 229、629、666 token/s，高估约 12.5%。再考虑实际 HBM 利用率 `η`：
 
-- 峰值 HBM 带宽不等于可持续应用带宽；
-- 每层还有 KV、激活和元数据访问；
-- kernel launch、同步和非 GEMM 算子占时间；
-- 张量并行时增加集合通信；
-- 低 batch 下计算单元利用率不足。
+```text
+tokens/s ≤ η × BW_peak / W_effective,  0 < η < 1
+```
 
-但这个估算仍然有用：它说明 decode 场景里 HBM4 的价值可能比更高的 Tensor FLOPS 更直接。
+端到端还要减去 KV 读取、非 GEMM 算子、kernel launch、同步和 tensor-parallel collective。这个公式的价值不是预测最终结果，而是给出不可违反的物理上界：实测若高于它，说明权重被 cache、跨多 GPU 分摊、batch 复用，或统计口径不同。
 
-## 8. 一个不容易误导自己的检查表
+### 8.1 多 GPU 不会凭空打破上限
 
-看到任何“新 GPU 快 N 倍”的说法，依次检查：
+若权重均匀切到 `p` 张 GPU，每张只读 `W/p`，HBM 聚合带宽也近似变为 `p×BW`，理想 token/s 可随 `p` 增长；但每层会引入 collective：
 
-1. 是峰值、microbenchmark 还是端到端？
-2. 是 dense 还是 sparse？
-3. 精度和质量目标是否相同？
-4. 比较的是单卡、单机、整架还是整个集群？
-5. 是 prefill 吞吐、decode 吞吐、首 token 延迟还是 token 间延迟？
-6. batch、输入长度和输出长度是否相同？
-7. 功耗和成本是否纳入？
+```text
+T_token ≳ max(W / (p × BW_effective), T_compute)
+          + T_collective_exposed
+```
 
-2026 年真正稀缺的不是 FLOPS，而是在给定质量、延迟和功耗约束下，把数据持续喂给计算单元的能力。
+当权重读取时间被压低到和 collective 同量级，继续加 TP rank 收益会快速递减。这就是 scale-up 带宽必须随 HBM 一起增长的原因。
+
+## 9. FP4 training 为什么一定是混合精度配方
+
+训练中存在权重、激活、梯度、优化器一阶/二阶矩、master weight 等不同数值角色。它们对范围、舍入偏差和噪声容忍度完全不同。
+
+NVIDIA 公布的 NVFP4 训练方法本身就说明“FP4 training”不是把所有张量强制成 4 bit：
+
+- 元素是 16-value block 的 E2M1；
+- scale 使用 E4M3，并保留 tensor-level scale；
+- weight-gradient 路径使用随机 Hadamard 变换削弱 outlier；
+- 权重可采用二维 16×16 scaling；
+- 部分路径使用 stochastic rounding；
+- 累加、归一化和优化器状态保留更高精度。
+
+参考：[Training with NVFP4 on Blackwell](https://developer.nvidia.com/blog/train-models-faster-with-jax-and-maxtext-using-nvfp4-on-nvidia-blackwell/)。
+
+训练显存也不能按 `P×2 byte` 估算。一个未分片的 Adam 混合精度粗略模型可能包含：
+
+```text
+BF16 parameters       2P bytes
+BF16 gradients        2P bytes
+FP32 master weights   4P bytes
+FP32 first moment     4P bytes
+FP32 second moment    4P bytes
+--------------------------------
+model states         16P bytes  （示意，取决于实现）
+```
+
+还没包括激活、临时 buffer 与通信 workspace。ZeRO/FSDP 把部分状态除以 data-parallel degree，但增加通信；activation checkpointing 降低激活容量，却用重算增加 FLOP。容量优化永远在时间模型里留下痕迹。
+
+## 10. 一份可复现的低精度性能报告应写什么
+
+至少公开以下信息：
+
+1. 模型版本、权重格式、激活格式、KV 格式和累加精度；
+2. scale 格式、block size、校准/训练方法；
+3. dense 还是 sparse，是否计入结构化稀疏倍数；
+4. 输入/输出长度分布，而不只是单个平均值；
+5. request rate、continuous batch、并发和调度策略；
+6. TTFT、ITL、TPOT、吞吐与 P50/P95/P99；
+7. tensor/context/pipeline/expert parallel 配置；
+8. 质量门槛，包括长上下文、代码、数学与目标业务集；
+9. 实际 HBM 占用、带宽利用率和 power cap；
+10. 软件、驱动、kernel 与编译参数版本。
+
+低精度的意义不是把规格表上的 FLOPS 放大，而是以可接受的数值误差换取更低的容量和 IO 成本。只有把有效位宽、数据复用、KV 流量与并行通信放进同一模型，才能知道省下的字节最后有没有变成用户看到的 token/s。
 
 ## 参考资料
 
-- [OCP MX Formats v1.0](https://www.opencompute.org/documents/ocp-microscaling-formats-mx-v1-0-spec-final-pdf)
-- [NVIDIA Rubin GPU Architecture](https://developer.nvidia.com/blog/inside-nvidia-rubin-gpu-architecture-powering-the-era-of-agentic-ai/)
-- [AMD CDNA 5 Architecture](https://www.amd.com/en/technologies/cdna.html)
-- [Google Ironwood codesigned stack](https://cloud.google.com/blog/products/compute/inside-the-ironwood-tpu-codesigned-ai-stack/)
+- [Roofline: An Insightful Visual Performance Model](https://dl.acm.org/doi/10.1145/1498765.1498785)
+- [OCP Microscaling Formats v1.0](https://www.opencompute.org/documents/ocp-microscaling-formats-mx-v1-0-spec-final-pdf)
+- [NVIDIA NVFP4 for Inference](https://developer.nvidia.com/blog/introducing-nvfp4-for-efficient-and-accurate-low-precision-inference/)
+- [NVIDIA NVFP4 Training](https://developer.nvidia.com/blog/train-models-faster-with-jax-and-maxtext-using-nvfp4-on-nvidia-blackwell/)
+- [FlashAttention](https://arxiv.org/abs/2205.14135)
+- [AMD CDNA Architecture](https://www.amd.com/en/technologies/cdna.html)
