@@ -20,7 +20,7 @@ permalink: /categories/
         <header>
           <div>
             <p class="category-slug">{{ category_key }}</p>
-            <h2>{% if category_key == 'ai-gpu' %}AI 与 GPU{% else %}{{ category_key | replace: '-', ' ' | capitalize }}{% endif %}</h2>
+            <h2>{% if category_key == 'ai-gpu' %}AI 与 GPU{% elsif category_key == 'nlp-language-models' %}NLP 与语言模型{% else %}{{ category_key | replace: '-', ' ' | capitalize }}{% endif %}</h2>
           </div>
           <span>{{ category_posts | size }} 篇</span>
         </header>

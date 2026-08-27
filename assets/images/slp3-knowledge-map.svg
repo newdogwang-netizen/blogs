@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+  <title id="title">SLP3 知识依赖地图</title><desc id="desc">从输入表示、概率学习到模型、系统与语言结构的知识路径。</desc>
+  <defs><style>
+    .bg{fill:#f7f4eb}.box{fill:#fffdf7;stroke:#bdb6a6;stroke-width:2}.core{fill:#183f37;stroke:#183f37}.accent{fill:#e65324;stroke:#e65324}.t{font:600 22px system-ui,"Microsoft YaHei",sans-serif;fill:#171914}.s{font:15px system-ui,"Microsoft YaHei",sans-serif;fill:#66695f}.w{fill:#fff}.line{fill:none;stroke:#827c70;stroke-width:2.5;marker-end:url(#arrow)}.dash{fill:none;stroke:#827c70;stroke-width:2;stroke-dasharray:8 8;marker-end:url(#arrow)}
+  </style><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0 0L9 3 0 6Z" fill="#827c70"/></marker></defs>
+  <rect class="bg" width="1200" height="680" rx="12"/>
+  <text class="t" x="60" y="58">SLP3（2026）不是“LLM 使用说明”，而是一条完整的语言技术栈</text>
+  <text class="s" x="60" y="87">实线表示主要知识依赖；虚线表示模型回到具体任务后的连接。</text>
+  <rect class="box" x="60" y="135" width="220" height="104" rx="8"/><text class="t" x="85" y="177">输入与切分</text><text class="s" x="85" y="207">Unicode · Token · BPE</text>
+  <rect class="box" x="350" y="135" width="220" height="104" rx="8"/><text class="t" x="375" y="177">概率与判别</text><text class="s" x="375" y="207">N-gram · LR · 交叉熵</text>
+  <rect class="box" x="640" y="135" width="220" height="104" rx="8"/><text class="t" x="665" y="177">表示学习</text><text class="s" x="665" y="207">Embedding · MLP</text>
+  <rect class="core" x="930" y="135" width="220" height="104" rx="8"/><text class="t w" x="955" y="177">基础模型</text><text class="s w" x="955" y="207">Transformer · Pretrain</text>
+  <path class="line" d="M280 187H342"/><path class="line" d="M570 187H632"/><path class="line" d="M860 187H922"/>
+  <rect class="accent" x="350" y="320" width="220" height="104" rx="8"/><text class="t w" x="375" y="362">后训练</text><text class="s w" x="375" y="392">SFT · 偏好 · RLVR</text>
+  <rect class="box" x="640" y="320" width="220" height="104" rx="8"/><text class="t" x="665" y="362">外部知识</text><text class="s" x="665" y="392">IR · RAG · 证据</text>
+  <rect class="box" x="930" y="320" width="220" height="104" rx="8"/><text class="t" x="955" y="362">分析与验证</text><text class="s" x="955" y="392">评测 · Probe · 因果性</text>
+  <path class="line" d="M1040 239V284H460V312"/><path class="line" d="M570 372H632"/><path class="line" d="M860 372H922"/>
+  <rect class="box" x="60" y="520" width="310" height="105" rx="8"/><text class="t" x="85" y="562">语音链路</text><text class="s" x="85" y="592">声学特征 · ASR · TTS</text>
+  <rect class="box" x="445" y="520" width="310" height="105" rx="8"/><text class="t" x="470" y="562">语言结构</text><text class="s" x="470" y="592">词法 · 句法 · 语义 · 指代</text>
+  <rect class="box" x="830" y="520" width="320" height="105" rx="8"/><text class="t" x="855" y="562">交互与应用</text><text class="s" x="855" y="592">翻译 · 信息抽取 · 对话</text>
+  <path class="dash" d="M460 424V475H215V512"/><path class="dash" d="M750 424V480H600V512"/><path class="dash" d="M1040 424V512"/>
+</svg>

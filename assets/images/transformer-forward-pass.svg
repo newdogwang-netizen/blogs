@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600" role="img" aria-labelledby="title desc">
+  <title id="title">自回归 Transformer 单步前向过程</title><desc id="desc">Token 经过嵌入、注意力、前馈网络和词表投影得到下一个 token 概率。</desc>
+  <defs><style>.bg{fill:#f7f4eb}.b{fill:#fffdf7;stroke:#bdb6a6;stroke-width:2}.a{fill:#183f37;stroke:#183f37}.o{fill:#e65324;stroke:#e65324}.t{font:600 20px system-ui,"Microsoft YaHei",sans-serif;fill:#171914}.s{font:14px system-ui,"Microsoft YaHei",sans-serif;fill:#66695f}.w{fill:#fff}.l{stroke:#827c70;stroke-width:2.5;fill:none;marker-end:url(#m)}</style><marker id="m" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0 0L9 3 0 6Z" fill="#827c70"/></marker></defs>
+  <rect class="bg" width="1200" height="600" rx="12"/><text class="t" x="55" y="52">Decoder-only Transformer：每一步只做条件分布估计</text>
+  <rect class="b" x="55" y="105" width="180" height="90" rx="8"/><text class="t" x="78" y="141">Token IDs</text><text class="s" x="78" y="169">x₁ … xₜ</text>
+  <rect class="b" x="285" y="105" width="190" height="90" rx="8"/><text class="t" x="308" y="141">Embedding</text><text class="s" x="308" y="169">token + position</text>
+  <rect class="a" x="525" y="85" width="260" height="130" rx="8"/><text class="t w" x="550" y="125">Transformer Block × L</text><text class="s w" x="550" y="157">Norm → Causal Attention</text><text class="s w" x="550" y="181">Residual → MLP → Residual</text>
+  <rect class="b" x="835" y="105" width="160" height="90" rx="8"/><text class="t" x="858" y="141">Unembed</text><text class="s" x="858" y="169">hₜWᵀ</text>
+  <rect class="o" x="1045" y="105" width="110" height="90" rx="8"/><text class="t w" x="1064" y="141">Softmax</text><text class="s w" x="1064" y="169">P(xₜ₊₁)</text>
+  <path class="l" d="M235 150H277"/><path class="l" d="M475 150H517"/><path class="l" d="M785 150H827"/><path class="l" d="M995 150H1037"/>
+  <rect class="b" x="120" y="320" width="285" height="155" rx="8"/><text class="t" x="145" y="358">训练时</text><text class="s" x="145" y="391">真实下一个 token 作标签</text><text class="s" x="145" y="420">最小化交叉熵 −log p(y)</text><text class="s" x="145" y="449">所有位置可并行计算</text>
+  <rect class="b" x="465" y="320" width="285" height="155" rx="8"/><text class="t" x="490" y="358">推理时</text><text class="s" x="490" y="391">采样/搜索选出一个 token</text><text class="s" x="490" y="420">追加到上下文，再运行一步</text><text class="s" x="490" y="449">KV cache 避免重复算旧 K/V</text>
+  <rect class="b" x="810" y="320" width="285" height="155" rx="8"/><text class="t" x="835" y="358">工程含义</text><text class="s" x="835" y="391">Prefill 偏计算；Decode 偏访存</text><text class="s" x="835" y="420">注意力复杂度随上下文增长</text><text class="s" x="835" y="449">概率正确不等于事实正确</text>
+  <path class="l" d="M1100 195V270H262V312"/><path class="l" d="M1100 195V270H607V312"/><path class="l" d="M1100 195V312"/>
+</svg>
