@@ -1,0 +1,34 @@
+---
+layout: default
+title: "云原生与 AI 基础设施"
+description: "2026 上海联合大会阅读笔记，研究推理编排、GPU 资源管理、训练通信、Agent 运行时与裸金属交付。"
+permalink: /cloud-native-ai-infra/
+---
+<section class="topic-page shell-narrow">
+  <p class="eyebrow">CLOUD NATIVE / AI INFRASTRUCTURE</p>
+  <h1>云原生与 AI 基础设施</h1>
+  <p class="topic-lede">2026 上海大会笔记：沿着项目文档和源码继续读。</p>
+  <p>这组笔记从大会中的具体问题写起：几个 Pod 怎样共同提供一个推理副本，GPU 分配后还要做哪些准备，通信恢复后训练又该从哪里继续。内容侧重实现细节、故障处理和部署条件，适合有 Kubernetes 或分布式系统经验的读者。</p>
+  <p class="source-note">更新于 2026-09-19。选题来自 KubeCon + CloudNativeCon + OpenInfra Summit + PyTorch Conference China，共 14 篇，配有 28 张示意图。各篇注明参考版本与来源；算例不是硬件实测。</p>
+  <h2>从哪里读起</h2>
+  <div class="reading-paths">
+    <div><h3>推理服务工程</h3><p>01 副本编排 → 09 KV 缓存 → 10 模型分发 → 12 多集群 → 14 平台协作</p></div>
+    <div><h3>算力平台工程</h3><p>05 设备状态 → 04 资源共享 → 03 Agent 运行时 → 08 主机交付 → 14 控制权</p></div>
+    <div><h3>框架与训练系统</h3><p>02 异构软件栈 → 06 GPU 通信 → 07 故障恢复 → 11 异步后训练 → 13 Kernel</p></div>
+  </div>
+  <nav class="topic-links" aria-label="系列章节"><a href="#main-notes">八篇主线</a><a href="#extension-notes">六篇延伸</a></nav>
+  {% assign notes = site.posts | where: 'series', '2026 上海大会技术研究笔记' | sort: 'series_part' %}
+  <h2 id="main-notes">一至八 · 主线文章</h2>
+  <p>从推理副本的组织方式开始，接着看运行时、设备分配、通信与主机交付。各篇也可以单独读。</p>
+  {% assign main_notes = notes | where: 'track', 'main' %}
+  {% include conference-reading-list.html notes=main_notes %}
+  <h2 id="extension-notes">九至十四 · 延伸专题</h2>
+  <p>这六篇分别讨论缓存、模型分发、异步后训练、多集群、kernel 编译和平台集成。</p>
+  {% assign extension_notes = notes | where: 'track', 'extension' %}
+  {% include conference-reading-list.html notes=extension_notes %}
+  <h2>资料与版本说明</h2>
+  <p>这些文章不是逐场录像的完整复盘。大会摘要用于确定讨论的问题，实现细节以引用的项目文档和源码为准。文中另有一些架构推导和测试建议，均与原项目的已有能力分开说明。</p>
+  <p>开发分支中存在代码，不代表发布版已支持；文档列出的能力，也仍需在自己的软硬件组合上验证。本系列没有运行 GPU 集群实验。</p>
+  <p>GPU 架构与物理组网放在“AI 与 GPU”，SLP3 阅读笔记放在“NLP 与语言模型”；这里集中记录软件系统怎样使用这些资源。</p>
+  <p><a href="https://www.lfopensource.cn/kubecon-cloudnativecon-openinfra-summit-pytorch-conference-china/program/schedule/">大会官方议程与场次资料</a> · <a href="{{ '/categories/#ai-gpu' | relative_url }}">AI 与 GPU</a> · <a href="{{ '/categories/#nlp-language-models' | relative_url }}">NLP 与语言模型</a></p>
+</section>

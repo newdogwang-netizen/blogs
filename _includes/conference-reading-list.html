@@ -1,0 +1,12 @@
+<ol class="topic-reading-list">
+  {% for post in include.notes %}
+  <li>
+    <span class="topic-number">{% if post.series_part < 10 %}0{% endif %}{{ post.series_part }}</span>
+    <div>
+      <h3><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h3>
+      <p>{{ post.description }}</p>
+      <span class="topic-time">{{ post.reading_time }} · 机制图与验证思路</span>
+    </div>
+  </li>
+  {% endfor %}
+</ol>

@@ -8,7 +8,7 @@ description: "记录技术实践、系统原理、AI 基础设施与持续研究
     <div class="hero-copy">
       <p class="eyebrow">TECHNOLOGY · SYSTEMS · RESEARCH</p>
       <h1>记录技术，<br><em>也记录思考的路径。</em></h1>
-      <p class="hero-lede">从底层原理到工程实践，从 AI 基础设施到更广泛的技术研究。把复杂问题拆开、复算，再写成可以继续使用的知识。</p>
+      <p class="hero-lede">这里记录 GPU、云原生、语言模型，以及读文档和源码时遇到的问题。笔记按主题整理，保留推导、图示和参考资料。</p>
       <div class="hero-actions">
         <a class="button button-primary" href="#latest">开始阅读</a>
         <a class="button button-quiet" href="{{ '/categories/' | relative_url }}">浏览全部分类</a>
@@ -28,14 +28,19 @@ description: "记录技术实践、系统原理、AI 基础设施与持续研究
 </section>
 
 <section class="article-section shell" id="latest">
+  <nav class="topic-links" aria-label="按领域阅读">
+    <a href="{{ '/cloud-native-ai-infra/' | relative_url }}">云原生与 AI 基础设施 ↗</a>
+    <a href="{{ '/categories/#ai-gpu' | relative_url }}">AI 与 GPU</a>
+    <a href="{{ '/categories/#nlp-language-models' | relative_url }}">NLP 与语言模型</a>
+  </nav>
   <header class="section-heading">
     <div><p class="eyebrow">LATEST NOTES</p><h2>最新文章</h2></div>
-    <p>从 AI 基础设施到 NLP 与语言模型，按专题建立可复算、可追溯的技术笔记。</p>
+    <p>最近更新的文章，也可以按上方分类查找。</p>
   </header>
   <div class="post-list">
     {% for post in site.posts %}
       <article class="post-card">
-        <div class="card-index">0{{ forloop.index }}</div>
+        <div class="card-index">{% if forloop.index < 10 %}0{% endif %}{{ forloop.index }}</div>
         <div class="card-content">
           <div class="card-meta"><time>{{ post.date | date: '%Y-%m-%d' }}</time><span>{{ post.category_name | default: post.categories.first }}</span><span>{{ post.reading_time }}</span></div>
           <h3><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h3>

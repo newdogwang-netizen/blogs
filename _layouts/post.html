@@ -1,9 +1,10 @@
 ---
 layout: default
 ---
-<article class="post">
+<article class="post{% if page.technical_series %} technical-series{% endif %}">
   <header class="post-hero shell-narrow">
-    <a class="back-link" href="{{ '/' | relative_url }}">← 返回文章列表</a>
+    {% if page.topic_url %}<a class="back-link" href="{{ page.topic_url | relative_url }}">← {{ page.category_name }} · 专题导读</a>
+    {% else %}<a class="back-link" href="{{ '/' | relative_url }}">← 返回文章列表</a>{% endif %}
     <div class="post-kicker">
       {% if page.series %}<span>{{ page.series }}</span><span>第 {{ page.series_part }} 篇</span>
       {% else %}<span>{{ page.category_name | default: page.categories.first }}</span>{% endif %}
@@ -17,7 +18,10 @@ layout: default
     <div class="tag-list" aria-label="文章标签">{% for tag in page.tags %}<span>{{ tag }}</span>{% endfor %}</div>
   </header>
 
-  <div class="post-body shell-narrow">{{ content }}</div>
+  <div class="post-body shell-narrow">
+    {% if page.toc %}<nav class="article-toc" aria-label="本篇目录" hidden><details open><summary>目录</summary><ol></ol></details></nav>{% endif %}
+    {{ content }}
+  </div>
 
   {% if page.series %}
   <aside class="series-panel shell-narrow">
@@ -27,7 +31,7 @@ layout: default
       {% assign series_posts = site.posts | where: 'series', page.series | sort: 'series_part' %}
       {% for post in series_posts %}
         <li{% if post.url == page.url %} class="current"{% endif %}>
-          <a href="{{ post.url | relative_url }}"><span>0{{ post.series_part }}</span>{{ post.title }}</a>
+          <a href="{{ post.url | relative_url }}"><span>{% if post.series_part < 10 %}0{% endif %}{{ post.series_part }}</span>{{ post.title }}</a>
         </li>
       {% endfor %}
     </ol>
