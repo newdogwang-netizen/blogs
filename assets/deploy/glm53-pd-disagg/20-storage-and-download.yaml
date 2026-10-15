@@ -1,0 +1,125 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: model-cache-p
+  namespace: glm53
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 500Gi
+  storageClassName: compute-csi-default-sc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: model-cache-d
+  namespace: glm53
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 500Gi
+  storageClassName: compute-csi-default-sc
+---
+# Download GLM-5.3-Flash once per PVC; anti-affinity pins the two pods to the
+# two distinct GPU nodes so each node gets a locally-attached checkpoint copy.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: glm53-model-download-p
+  namespace: glm53
+spec:
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app: glm53-model-download
+        role: prefill
+    spec:
+      restartPolicy: Never
+      nodeSelector:
+        nebius.com/gpu: "true"
+      tolerations:
+        - key: nvidia.com/gpu
+          operator: Exists
+          effect: NoSchedule
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app: glm53-model-download
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: model-download
+          image: python:3.10-slim
+          command: ["sh", "-c"]
+          env:
+            - name: HF_HOME
+              value: /model-cache
+            - name: HF_XET_HIGH_PERFORMANCE
+              value: "1"
+          args:
+            - |
+              set -eux
+              pip install --no-cache-dir "huggingface_hub[hf_xet]==0.36.0"
+              hf download zai-org/GLM-5.3-Flash
+              du -sh /model-cache/hub/models--zai-org--GLM-5.3-Flash
+          volumeMounts:
+            - name: model-cache
+              mountPath: /model-cache
+      volumes:
+        - name: model-cache
+          persistentVolumeClaim:
+            claimName: model-cache-p
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: glm53-model-download-d
+  namespace: glm53
+spec:
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app: glm53-model-download
+        role: decode
+    spec:
+      restartPolicy: Never
+      nodeSelector:
+        nebius.com/gpu: "true"
+      tolerations:
+        - key: nvidia.com/gpu
+          operator: Exists
+          effect: NoSchedule
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app: glm53-model-download
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: model-download
+          image: python:3.10-slim
+          command: ["sh", "-c"]
+          env:
+            - name: HF_HOME
+              value: /model-cache
+            - name: HF_XET_HIGH_PERFORMANCE
+              value: "1"
+          args:
+            - |
+              set -eux
+              pip install --no-cache-dir "huggingface_hub[hf_xet]==0.36.0"
+              hf download zai-org/GLM-5.3-Flash
+              du -sh /model-cache/hub/models--zai-org--GLM-5.3-Flash
+          volumeMounts:
+            - name: model-cache
+              mountPath: /model-cache
+      volumes:
+        - name: model-cache
+          persistentVolumeClaim:
+            claimName: model-cache-d

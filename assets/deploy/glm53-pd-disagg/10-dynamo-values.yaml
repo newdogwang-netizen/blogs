@@ -1,0 +1,5 @@
+# Minimal Dynamo platform: operator + etcd only.
+global:
+  grove:
+    install: false
+    enabled: false

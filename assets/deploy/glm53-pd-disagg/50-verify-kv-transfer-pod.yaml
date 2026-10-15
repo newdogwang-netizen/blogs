@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ibcheck
+  namespace: qwen-finetune
+spec:
+  restartPolicy: Never
+  activeDeadlineSeconds: 300
+  nodeSelector:
+    nebius.com/gpu: "true"
+  tolerations:
+    - key: nvidia.com/gpu
+      operator: Exists
+      effect: NoSchedule
+  containers:
+    - name: ibcheck
+      image: busybox:1.36
+      command: ["sh", "-c"]
+      args:
+        - |
+          ls -la /output
+          echo "=== NCCL IB lines ==="
+          grep -E "NET/IB|Using network|Via.*HCA" /output/launch.log | head -30 || echo "no matches"
+          echo "=== TRAIN_METRIC sample ==="
+          head -3 /output/metrics.jsonl 2>/dev/null
+          tail -3 /output/metrics.jsonl 2>/dev/null
+      volumeMounts:
+        - name: out
+          mountPath: /output
+  volumes:
+    - name: out
+      persistentVolumeClaim:
+        claimName: qwen-throughput-20261007-master

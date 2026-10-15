@@ -51,6 +51,8 @@ dynamo-platform-dynamo-operator-controller-manager   1/1   Running
 dynamo-platform-etcd-0                                1/1   Running
 ```
 
+本文用到的全部 YAML、脚本与 apply 顺序，按编号存放在 [assets/deploy/glm53-pd-disagg/](https://github.com/newdogwang-netizen/blogs/tree/main/assets/deploy/glm53-pd-disagg)，下文每一节提到的 manifest 都能按编号对应到仓库里的文件。
+
 ## 三、存储：为什么官方 recipe 假设 RWX，而我们用了两个 RWO
 
 官方 recipe 的 PVC 是 ReadWriteMany——一份模型缓存（GLM-5.3-Flash FP8 是 328GB）同时挂给 prefill 和 decode 两个 worker。这在有共享文件系统的环境（Filestore、EFS、CephFS）是最优解：下载一次，处处挂载。
@@ -188,3 +190,5 @@ dyn://…prefill.worker_kv_query_source_…                    (KV 查询端点)
 - ePDL / Mooncake 等其他 KV 传输层的对比（vLLM 生态里 NixlConnector 不是唯一选项）
 
 部署当天完成，以上是当天能沉淀的全部认知；有 benchmark 数据后继续写。
+
+> **配套工件**：本文的 helm values、存储/下载 manifest、最终版 DGD（H100 适配后）、启动监控脚本与验证 pod，统一存放在 [assets/deploy/glm53-pd-disagg/](https://github.com/newdogwang-netizen/blogs/tree/main/assets/deploy/glm53-pd-disagg)，README 里有完整 apply 顺序和环境假设清单。

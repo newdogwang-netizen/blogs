@@ -1,0 +1,432 @@
+# GLM-5.3-Flash PD-disaggregated deployment on Nebius mk8s 2x8 H100 80GB.
+# Based on ai-dynamo v1.5.0 recipe: recipes/glm-5.3-flash/vllm/disagg-h200-agentic/deploy.yaml
+# Adaptations for this cluster:
+#   - H100 (no gpu.product label; pin by hostname instead) — prefill on .7 node, decode on .44 node
+#   - No GPU operator / RuntimeClass: privileged pods, hostPath /dev/infiniband passthrough
+#     (same pattern the existing csi-train SFT pods use; NCCL IB verified working via GDRDMA+SHARP)
+#   - 80GB HBM: max-model-len 65536 (vs 1M on H200), gpu-mem-util 0.90/0.93
+#   - Per-node RWO model caches (model-cache-p / model-cache-d)
+#   - decode node is also where tinker used to run; both nodes are exclusively ours now
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: glm53-disagg-workarounds
+  namespace: glm53
+data:
+  sitecustomize.py: |
+    import torch
+
+    # Work around the native cuDNN Conv2d crash in the GLM vLLM image.
+    torch.backends.cudnn.enabled = False
+    print(
+        "GLM 5.3 workaround: torch.backends.cudnn.enabled=False",
+        flush=True,
+    )
+---
+apiVersion: nvidia.com/v1beta1
+kind: DynamoGraphDeployment
+metadata:
+  name: glm53-flash-disagg
+  namespace: glm53
+  labels:
+    app.kubernetes.io/name: glm53-flash-disagg
+    app.kubernetes.io/part-of: glm53-flash
+spec:
+  backendFramework: vllm
+  components:
+    - name: Frontend
+      type: frontend
+      runtimeVersionOverride: 1.4.1
+      replicas: 1
+      podTemplate:
+        spec:
+          containers:
+            - name: main
+              image: vllm/vllm-openai:glm53-flash
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/bash
+                - -lc
+              args:
+                - |
+                  set -euo pipefail
+                  python3 -m pip install ai-dynamo==1.4.1
+                  exec python3 -m dynamo.frontend \
+                    --http-host 0.0.0.0 \
+                    --http-port 8000 \
+                    --dyn-chat-processor dynamo
+              env:
+                - name: DYN_ROUTER_MODE
+                  value: kv
+                - name: PYTHONUNBUFFERED
+                  value: "1"
+              ports:
+                - name: http
+                  containerPort: 8000
+              startupProbe:
+                httpGet:
+                  path: /health
+                  port: http
+                periodSeconds: 15
+                timeoutSeconds: 10
+                failureThreshold: 240
+              resources:
+                requests:
+                  cpu: "4"
+                  memory: 8Gi
+                limits:
+                  cpu: "16"
+                  memory: 32Gi
+
+    - name: VllmPrefillWorker
+      type: prefill
+      runtimeVersionOverride: 1.4.1
+      replicas: 1
+      podTemplate:
+        metadata:
+          annotations:
+            nvidia.com/vllm-distributed-executor-backend: mp
+          labels:
+            glm53.nvidia.com/role: prefill
+        spec:
+          terminationGracePeriodSeconds: 60
+          nodeSelector:
+            kubernetes.io/hostname: computeinstance-e00k0f4ba6yj9tt8gm
+          tolerations:
+            - key: nvidia.com/gpu
+              operator: Equal
+              value: "true"
+              effect: NoSchedule
+          containers:
+            - name: main
+              image: vllm/vllm-openai:glm53-flash
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/bash
+                - -lc
+              args:
+                - |
+                  set -euo pipefail
+                  ulimit -l unlimited || true
+                  ulimit -n 1048576
+
+                  python3 -m pip install ai-dynamo==1.4.1
+                  export PYTHONPATH="/opt/glm53-workarounds${PYTHONPATH:+:$PYTHONPATH}"
+
+                  model_path=""
+                  for cache_root in \
+                    /model-cache/hub/models--zai-org--GLM-5.3-Flash/snapshots \
+                    /model-cache/models--zai-org--GLM-5.3-Flash/snapshots
+                  do
+                    [ -d "$cache_root" ] || continue
+                    for cache_snapshot in "$cache_root"/*
+                    do
+                      if [ -e "$cache_snapshot/config.json" ] && \
+                         [ -e "$cache_snapshot/tokenizer_config.json" ]
+                      then
+                        model_path="$cache_snapshot"
+                        break 2
+                      fi
+                    done
+                  done
+
+                  if [ -z "$model_path" ]
+                  then
+                    echo "Cached zai-org/GLM-5.3-Flash snapshot not found"
+                    exit 42
+                  fi
+
+                  exec python3 -m dynamo.vllm \
+                    --model "$model_path" \
+                    --served-model-name zai-org/GLM-5.3-Flash \
+                    --distributed-executor-backend mp \
+                    --load-format fastsafetensors \
+                    --safetensors-load-strategy lazy \
+                    --tensor-parallel-size 8 \
+                    --enable-multimodal \
+                    --enable-prefix-caching \
+                    --prefix-match-unit 128 \
+                    --limit-mm-per-prompt '{"image":1}' \
+                    --mm-encoder-tp-mode data \
+                    --no-enable-flashinfer-autotune \
+                    --skip-mm-profiling \
+                    --moe-backend deep_gemm \
+                    --max-num-seqs 16 \
+                    --max-model-len 65536 \
+                    --max-num-batched-tokens 8192 \
+                    --compilation-config '{"cudagraph_mode":"FULL_AND_PIECEWISE", "max_cudagraph_capture_size": 8192, "cudagraph_capture_sizes": [1, 2, 4, 8, 12, 16, 20, 24, 32, 48, 64, 96, 128, 192, 256, 512, 1024, 1536, 2048, 2560, 3072, 4096, 6144, 8192]}' \
+                    --gpu-memory-utilization 0.90 \
+                    --dyn-tool-call-parser glm47 \
+                    --dyn-reasoning-parser glm45 \
+                    --no-disable-hybrid-kv-cache-manager \
+                    --kv-events-config '{"enable_kv_cache_events":true,"publisher":"zmq"}' \
+                    --kv-transfer-config '{"kv_connector":"NixlConnector","kv_role":"kv_producer","kv_buffer_device":"cuda"}' \
+                    --disaggregation-mode prefill \
+                    --speculative-config '{"method":"mtp","num_speculative_tokens":7}'
+              env:
+                - name: HF_HOME
+                  value: /model-cache
+                - name: HF_HUB_CACHE
+                  value: /model-cache/hub
+                - name: HF_HUB_OFFLINE
+                  value: "1"
+                - name: TRANSFORMERS_OFFLINE
+                  value: "1"
+                - name: VLLM_ENGINE_READY_TIMEOUT_S
+                  value: "3600"
+                - name: VLLM_WORKER_MULTIPROC_METHOD
+                  value: spawn
+                - name: VLLM_USE_NCCL_SYMM_MEM
+                  value: "0"
+                - name: VLLM_SKIP_P2P_CHECK
+                  value: "1"
+                - name: VLLM_SSM_CONV_STATE_LAYOUT
+                  value: DS
+                - name: VLLM_KV_CACHE_LAYOUT
+                  value: HND
+                - name: NCCL_CUMEM_ENABLE
+                  value: "1"
+                - name: NCCL_IB_DISABLE
+                  value: "0"
+                - name: NCCL_IB_HCA
+                  value: mlx5
+                - name: NCCL_SOCKET_IFNAME
+                  value: eth0
+                - name: GLOO_SOCKET_IFNAME
+                  value: eth0
+                - name: DYN_REQUEST_PLANE
+                  value: tcp
+                - name: ETCD_LEASE_TTL
+                  value: "120"
+                - name: PYTHONUNBUFFERED
+                  value: "1"
+              startupProbe:
+                httpGet:
+                  path: /health
+                  port: 9090
+                periodSeconds: 10
+                timeoutSeconds: 10
+                failureThreshold: 720
+              resources:
+                requests:
+                  cpu: "64"
+                  memory: 700Gi
+                  nvidia.com/gpu: "8"
+                limits:
+                  cpu: "120"
+                  memory: 1500Gi
+                  nvidia.com/gpu: "8"
+              securityContext:
+                privileged: true
+              volumeMounts:
+                - name: pytorch-workarounds
+                  mountPath: /opt/glm53-workarounds
+                  readOnly: true
+                - name: shared-model-cache
+                  mountPath: /model-cache
+                  readOnly: true
+                - name: vllm-cache
+                  mountPath: /root/.cache/vllm
+                - name: pip-cache
+                  mountPath: /root/.cache/pip
+                - name: shm
+                  mountPath: /dev/shm
+                - name: rdma
+                  mountPath: /dev/infiniband
+                  readOnly: true
+          volumes:
+            - name: pytorch-workarounds
+              configMap:
+                name: glm53-disagg-workarounds
+            - name: shared-model-cache
+              persistentVolumeClaim:
+                claimName: model-cache-p
+                readOnly: true
+            - name: vllm-cache
+              emptyDir: {}
+            - name: pip-cache
+              emptyDir: {}
+            - name: shm
+              emptyDir:
+                medium: Memory
+                sizeLimit: 64Gi
+            - name: rdma
+              hostPath:
+                path: /dev/infiniband
+                type: Directory
+
+    - name: VllmDecodeWorker
+      type: decode
+      runtimeVersionOverride: 1.4.1
+      replicas: 1
+      podTemplate:
+        metadata:
+          annotations:
+            nvidia.com/vllm-distributed-executor-backend: mp
+          labels:
+            glm53.nvidia.com/role: decode
+        spec:
+          terminationGracePeriodSeconds: 60
+          nodeSelector:
+            kubernetes.io/hostname: computeinstance-e00ks2cxj95tarj1r0
+          tolerations:
+            - key: nvidia.com/gpu
+              operator: Equal
+              value: "true"
+              effect: NoSchedule
+          containers:
+            - name: main
+              image: vllm/vllm-openai:glm53-flash
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/bash
+                - -lc
+              args:
+                - |
+                  set -euo pipefail
+                  ulimit -l unlimited || true
+                  ulimit -n 1048576
+
+                  python3 -m pip install ai-dynamo==1.4.1
+                  export PYTHONPATH="/opt/glm53-workarounds${PYTHONPATH:+:$PYTHONPATH}"
+
+                  model_path=""
+                  for cache_root in \
+                    /model-cache/hub/models--zai-org--GLM-5.3-Flash/snapshots \
+                    /model-cache/models--zai-org--GLM-5.3-Flash/snapshots
+                  do
+                    [ -d "$cache_root" ] || continue
+                    for cache_snapshot in "$cache_root"/*
+                    do
+                      if [ -e "$cache_snapshot/config.json" ] && \
+                         [ -e "$cache_snapshot/tokenizer_config.json" ]
+                      then
+                        model_path="$cache_snapshot"
+                        break 2
+                      fi
+                    done
+                  done
+
+                  if [ -z "$model_path" ]
+                  then
+                    echo "Cached zai-org/GLM-5.3-Flash snapshot not found"
+                    exit 42
+                  fi
+
+                  exec python3 -m dynamo.vllm \
+                    --model "$model_path" \
+                    --served-model-name zai-org/GLM-5.3-Flash \
+                    --distributed-executor-backend mp \
+                    --load-format fastsafetensors \
+                    --safetensors-load-strategy lazy \
+                    --tensor-parallel-size 8 \
+                    --enable-multimodal \
+                    --enable-prefix-caching \
+                    --prefix-match-unit 128 \
+                    --limit-mm-per-prompt '{"image":1}' \
+                    --mm-encoder-tp-mode data \
+                    --no-enable-flashinfer-autotune \
+                    --skip-mm-profiling \
+                    --moe-backend deep_gemm \
+                    --max-num-seqs 64 \
+                    --max-num-batched-tokens 2048 \
+                    --max-model-len 65536 \
+                    --compilation-config '{"cudagraph_mode":"FULL_AND_PIECEWISE", "max_cudagraph_capture_size": 2048}' \
+                    --gpu-memory-utilization 0.93 \
+                    --dyn-tool-call-parser glm47 \
+                    --dyn-reasoning-parser glm45 \
+                    --no-disable-hybrid-kv-cache-manager \
+                    --kv-transfer-config '{"kv_connector":"NixlConnector","kv_role":"kv_consumer","kv_buffer_device":"cuda"}' \
+                    --disaggregation-mode decode \
+                    --speculative-config '{"method":"mtp","num_speculative_tokens":7}'
+              env:
+                - name: HF_HOME
+                  value: /model-cache
+                - name: HF_HUB_CACHE
+                  value: /model-cache/hub
+                - name: HF_HUB_OFFLINE
+                  value: "1"
+                - name: TRANSFORMERS_OFFLINE
+                  value: "1"
+                - name: VLLM_ENGINE_READY_TIMEOUT_S
+                  value: "3600"
+                - name: VLLM_WORKER_MULTIPROC_METHOD
+                  value: spawn
+                - name: VLLM_USE_NCCL_SYMM_MEM
+                  value: "0"
+                - name: VLLM_SKIP_P2P_CHECK
+                  value: "1"
+                - name: VLLM_SSM_CONV_STATE_LAYOUT
+                  value: DS
+                - name: VLLM_KV_CACHE_LAYOUT
+                  value: HND
+                - name: NCCL_CUMEM_ENABLE
+                  value: "1"
+                - name: NCCL_IB_DISABLE
+                  value: "0"
+                - name: NCCL_IB_HCA
+                  value: mlx5
+                - name: NCCL_SOCKET_IFNAME
+                  value: eth0
+                - name: GLOO_SOCKET_IFNAME
+                  value: eth0
+                - name: DYN_REQUEST_PLANE
+                  value: tcp
+                - name: ETCD_LEASE_TTL
+                  value: "120"
+                - name: PYTHONUNBUFFERED
+                  value: "1"
+              startupProbe:
+                httpGet:
+                  path: /health
+                  port: 9090
+                periodSeconds: 10
+                timeoutSeconds: 10
+                failureThreshold: 720
+              resources:
+                requests:
+                  cpu: "64"
+                  memory: 700Gi
+                  nvidia.com/gpu: "8"
+                limits:
+                  cpu: "120"
+                  memory: 1500Gi
+                  nvidia.com/gpu: "8"
+              securityContext:
+                privileged: true
+              volumeMounts:
+                - name: pytorch-workarounds
+                  mountPath: /opt/glm53-workarounds
+                  readOnly: true
+                - name: shared-model-cache
+                  mountPath: /model-cache
+                  readOnly: true
+                - name: vllm-cache
+                  mountPath: /root/.cache/vllm
+                - name: pip-cache
+                  mountPath: /root/.cache/pip
+                - name: shm
+                  mountPath: /dev/shm
+                - name: rdma
+                  mountPath: /dev/infiniband
+                  readOnly: true
+          volumes:
+            - name: pytorch-workarounds
+              configMap:
+                name: glm53-disagg-workarounds
+            - name: shared-model-cache
+              persistentVolumeClaim:
+                claimName: model-cache-d
+                readOnly: true
+            - name: vllm-cache
+              emptyDir: {}
+            - name: pip-cache
+              emptyDir: {}
+            - name: shm
+              emptyDir:
+                medium: Memory
+                sizeLimit: 64Gi
+            - name: rdma
+              hostPath:
+                path: /dev/infiniband
+                type: Directory
