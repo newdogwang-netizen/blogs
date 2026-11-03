@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 645" role="img" aria-labelledby="title desc">
+  <title id="title">工具调用与结果怎样归入同一个 ATIF Step</title>
+  <desc id="desc">左侧七条示意原生事件包含用户、一次模型输出、两个工具调用、乱序返回的结果和最终回答。转换器按模型调用分组、按 call ID 配对，得到三个 ATIF steps。</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#526e83"/></marker></defs>
+  <rect width="1080" height="645" fill="#f7f4eb"/>
+  <g font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" fill="#25352f">
+    <text x="36" y="46" font-size="28">7 条示意事件 → 3 个 ATIF Steps</text>
+    <text x="36" y="80" font-size="18" fill="#5c6d64">turn_id 决定模型调用归属；call_id 决定结果配对；结果到达顺序可以不同</text>
+    <rect x="45" y="112" width="405" height="464" rx="14" fill="#fffdf7" stroke="#81978b"/>
+    <text x="65" y="151" font-size="23">归一化前的事件（教学格式）</text>
+    <g font-size="20">
+      <text x="65" y="200">user：创建文件并检查目录</text>
+      <text x="65" y="252">assistant：turn=m1</text>
+      <text x="65" y="304">tool_call：m1 / c1 / touch</text>
+      <text x="65" y="356">tool_call：m1 / c2 / pwd</text>
+      <text x="65" y="408">tool_result：c2 → /app</text>
+      <text x="65" y="460">tool_result：c1 → exit code 0</text>
+      <text x="65" y="528">assistant：turn=m2 / Done</text>
+    </g>
+    <g fill="none" stroke="#526e83" stroke-width="2.5" marker-end="url(#arrow)">
+      <path d="M450 194H610"/><path d="M450 361H610"/><path d="M450 528H610"/>
+    </g>
+    <rect x="613" y="157" width="420" height="72" rx="12" fill="#e5edf3" stroke="#81978b"/>
+    <text x="635" y="199" font-size="22">Step 1 · source=user</text>
+    <rect x="613" y="251" width="420" height="225" rx="12" fill="#e5efe8" stroke="#81978b"/>
+    <text x="635" y="289" font-size="22">Step 2 · source=agent / m1</text>
+    <text x="635" y="327" font-size="19">message + reasoning + metrics（一次）</text>
+    <text x="635" y="367" font-size="19">tool_calls = [c1, c2]</text>
+    <text x="635" y="407" font-size="19">observation.results：</text>
+    <text x="655" y="442" font-size="19">c2 → /app；c1 → exit code 0</text>
+    <rect x="613" y="493" width="420" height="72" rx="12" fill="#e5edf3" stroke="#81978b"/>
+    <text x="635" y="535" font-size="22">Step 3 · source=agent / m2</text>
+    <text x="45" y="614" font-size="18" fill="#5c6d64">结果中的 source_call_id，必须引用同一 Step 内 tool_calls 的 tool_call_id。</text>
+  </g>
+</svg>

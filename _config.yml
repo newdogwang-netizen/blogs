@@ -33,4 +33,5 @@ defaults:
 exclude:
   - work
   - outputs
+  - research
   - README.md

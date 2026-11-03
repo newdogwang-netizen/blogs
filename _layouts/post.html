@@ -1,7 +1,7 @@
 ---
 layout: default
 ---
-<article class="post{% if page.technical_series %} technical-series{% endif %}">
+<article class="post{% if page.technical_series %} technical-series{% endif %}{% if page.guided_reading %} guided-article{% endif %}">
   <header class="post-hero shell-narrow">
     {% if page.topic_url %}<a class="back-link" href="{{ page.topic_url | relative_url }}">← {{ page.category_name }} · 专题导读</a>
     {% else %}<a class="back-link" href="{{ '/' | relative_url }}">← 返回文章列表</a>{% endif %}
@@ -19,7 +19,7 @@ layout: default
   </header>
 
   <div class="post-body shell-narrow">
-    {% if page.toc %}<nav class="article-toc" aria-label="本篇目录" hidden><details open><summary>目录</summary><ol></ol></details></nav>{% endif %}
+    {% if page.toc %}<nav class="article-toc" aria-label="本篇目录" hidden><details{% unless page.guided_reading %} open{% endunless %}><summary>目录</summary><ol></ol></details></nav>{% endif %}
     {{ content }}
   </div>
 

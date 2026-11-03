@@ -10,9 +10,14 @@
 
 - **AI 与 GPU**：GPU 架构、互联、内存精度，以及 HGX B300 八卡节点与 18 台服务器集群设计。
 - **NLP 与语言模型**：SLP3 阅读笔记，独立于 GPU 分类。
-- **云原生与 AI 基础设施**：[专题目录](https://newdogwang-netizen.github.io/blogs/cloud-native-ai-infra/)，收录 2026 上海联合大会相关的 14 篇技术研究笔记（8 篇主线 + 6 篇延伸）。
+- **云原生与 AI 基础设施**：[专题目录](https://newdogwang-netizen.github.io/blogs/cloud-native-ai-infra/)，收录 Harbor Agent 轨迹与 ATIF、Dynamo PD 分离部署，以及 2026 上海联合大会相关的 14 篇研究笔记。
 
 新系列配有 28 张原创 SVG 图，讨论实现细节、故障处理和测试方法。各篇注明资料来源和参考版本，区分已有能力与架构推导；文中算例不是 GPU 实测结果。
+
+## 近期研究
+
+- [Harbor 轨迹解析：从一次任务到 ATIF](_posts/2026-11-03-harbor-agent-adapters-trajectory-atif.md)：用一个任务贯穿 Agent 适配、日志转换与协议校验，附可运行示例。
+- [ai-Dynamo PD 分离部署学习笔记](_posts/2026-10-14-ai-dynamo-glm53-flash-pd-disaggregation-h100.md)：Dynamo 组件、NIXL KV 传输与 H100 部署实践。
 
 ## 2026 GPU 进阶笔记
 

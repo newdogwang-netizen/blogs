@@ -1,7 +1,8 @@
 <ol class="topic-reading-list">
   {% for post in include.notes %}
   <li>
-    <span class="topic-number">{% if post.series_part < 10 %}0{% endif %}{{ post.series_part }}</span>
+    {% assign note_number = post.series_part | default: forloop.index %}
+    <span class="topic-number">{% if note_number < 10 %}0{% endif %}{{ note_number }}</span>
     <div>
       <h3><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h3>
       <p>{{ post.description }}</p>

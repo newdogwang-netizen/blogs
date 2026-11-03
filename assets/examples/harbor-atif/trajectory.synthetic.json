@@ -1,0 +1,81 @@
+{
+  "schema_version": "ATIF-v1.7",
+  "session_id": "synthetic-demo-run",
+  "agent": {
+    "name": "teaching-agent",
+    "version": "1.0",
+    "model_name": "demo/model"
+  },
+  "steps": [
+    {
+      "step_id": 1,
+      "source": "user",
+      "message": "Create hello.txt and check the current directory."
+    },
+    {
+      "step_id": 2,
+      "source": "agent",
+      "message": "Creating the file and checking the directory.",
+      "tool_calls": [
+        {
+          "tool_call_id": "c1",
+          "function_name": "shell",
+          "arguments": {
+            "command": "touch hello.txt"
+          }
+        },
+        {
+          "tool_call_id": "c2",
+          "function_name": "shell",
+          "arguments": {
+            "command": "pwd"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "c2",
+            "content": "/app"
+          },
+          {
+            "source_call_id": "c1",
+            "content": "exit code 0"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 30,
+        "completion_tokens": 8,
+        "cached_tokens": 10
+      },
+      "llm_call_count": 1,
+      "extra": {
+        "native_turn_id": "m1"
+      }
+    },
+    {
+      "step_id": 3,
+      "source": "agent",
+      "message": "Done.",
+      "metrics": {
+        "prompt_tokens": 45,
+        "completion_tokens": 2,
+        "cached_tokens": 20
+      },
+      "llm_call_count": 1,
+      "extra": {
+        "native_turn_id": "m2"
+      }
+    }
+  ],
+  "final_metrics": {
+    "total_prompt_tokens": 75,
+    "total_completion_tokens": 10,
+    "total_cached_tokens": 30,
+    "total_steps": 3
+  },
+  "extra": {
+    "synthetic": true
+  }
+}

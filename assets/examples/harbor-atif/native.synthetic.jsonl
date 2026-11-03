@@ -1,0 +1,7 @@
+{"type":"user","text":"Create hello.txt and check the current directory."}
+{"type":"assistant","turn_id":"m1","text":"Creating the file and checking the directory.","usage":{"prompt_tokens":30,"completion_tokens":8,"cached_tokens":10}}
+{"type":"tool_call","turn_id":"m1","call_id":"c1","name":"shell","arguments":{"command":"touch hello.txt"}}
+{"type":"tool_call","turn_id":"m1","call_id":"c2","name":"shell","arguments":{"command":"pwd"}}
+{"type":"tool_result","call_id":"c2","content":"/app"}
+{"type":"tool_result","call_id":"c1","content":"exit code 0"}
+{"type":"assistant","turn_id":"m2","text":"Done.","usage":{"prompt_tokens":45,"completion_tokens":2,"cached_tokens":20}}

@@ -25,7 +25,7 @@ permalink: /categories/
           <span>{{ category_posts | size }} 篇</span>
         </header>
         {% if category_key == 'cloud-native-ai-infra' %}
-        <p class="category-intro">从大会分享继续读文档和源码，记录推理编排、设备分配、Agent 运行时与训练系统中的具体问题。<a href="{{ '/cloud-native-ai-infra/' | relative_url }}">查看专题目录 →</a></p>
+        <p class="category-intro">沿文档、源码与部署实践，理解推理服务、Agent 评测与轨迹、设备分配和训练系统。<a href="{{ '/cloud-native-ai-infra/' | relative_url }}">查看专题目录 →</a></p>
         {% endif %}
         <ol>
           {% for post in category_posts %}

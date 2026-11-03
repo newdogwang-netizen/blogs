@@ -194,6 +194,63 @@ img { max-width: 100%; }
 .reading-paths h3 { margin: 0 0 5px; font-size: .98rem; }
 .reading-paths p { margin: 0; color: var(--muted); font-size: .9rem; }
 
+/* Guided articles keep the explanation visible and source details optional. */
+.guided-article .shell-narrow { width: min(760px, calc(100% - 48px)); }
+.guided-article .post-description { max-width: 42em; line-height: 1.85; }
+.guided-article .post-meta { gap: 10px 18px; }
+.guided-article .post-body { font-size: 1.0625rem; line-height: 1.9; }
+.guided-article .post-body h2 { margin-top: 3.4em; padding-top: 1em; font-size: 1.48rem; font-weight: 650; text-wrap: balance; }
+.guided-article .post-body h3 { margin-top: 2.5em; font-size: 1.16rem; font-weight: 650; }
+.guided-article .post-body p { margin-block: 1.25em; }
+.guided-article .post-body li { margin-block: .45em; }
+.guided-article .article-toc { padding: 14px 20px; margin-bottom: 30px; background: transparent; }
+.guided-article .article-toc ol { columns: 1; }
+.guided-article .article-toc li { margin: 0; }
+.guided-article .reading-guide { margin: 28px 0 36px; padding: 20px 24px; border-left: 3px solid var(--accent-2); background: var(--surface); }
+.guided-article .reading-guide p { margin: 0 0 12px; font-size: .94rem; }
+.guided-article .reading-guide ol { margin: 0; padding-left: 1.4em; }
+.guided-article .reading-guide li { margin-block: .55em; font-size: .92rem; }
+.guided-article .reading-guide a { font-weight: 650; }
+.guided-article .step-flow { margin: 30px 0; padding: 0 22px; border: 1px solid var(--line); border-radius: 5px; }
+.guided-article .step-flow ol { margin: 0; padding: 0; list-style: none; }
+.guided-article .step-flow li { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 20px; margin: 0; padding: 22px 0; }
+.guided-article .step-flow li + li { border-top: 1px solid var(--line); }
+.guided-article .step-flow-label { padding-top: 2px; color: var(--accent-2); font-size: .83rem; line-height: 1.9; font-weight: 650; }
+.guided-article .step-flow p { margin: 7px 0 0; font-size: .94rem; }
+.guided-article .step-flow dl { display: grid; grid-template-columns: 80px minmax(0, 1fr); gap: 12px 16px; margin-bottom: 0; font-size: .91rem; }
+.guided-article .step-flow dt { color: var(--muted); }
+.guided-article .step-flow dd { margin: 0; }
+.guided-article .step-flow figcaption { padding: 15px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: .81rem; line-height: 1.8; }
+.guided-article .post-body blockquote { margin-block: 30px; padding: 17px 21px; font-size: .98rem; line-height: 1.85; color: var(--ink); }
+.guided-article .post-body blockquote p { margin: 0; }
+.guided-article .post-body pre { padding: 20px; font-size: .81rem; line-height: 1.75; tab-size: 4; }
+.guided-article .post-body table { font-size: .9rem; line-height: 1.75; }
+.guided-article .post-body th, .guided-article .post-body td { padding: 13px 15px; }
+.guided-article .post-body .source-detail { margin: 24px 0; border-block: 1px solid var(--line); }
+.guided-article .source-detail > summary { min-height: 48px; padding: 14px 4px; cursor: pointer; color: var(--accent-2); font-size: .91rem; font-weight: 650; line-height: 1.7; }
+.guided-article .source-detail > summary:hover { color: var(--ink); }
+.guided-article .source-detail[open] > summary { border-bottom: 1px solid var(--line); }
+.guided-article .source-detail > :not(summary) { font-size: .94rem; }
+.guided-article .source-detail > p:last-child { margin-bottom: 24px; }
+.guided-article .post-body a:focus-visible, .guided-article summary:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 4px; border-radius: 2px; }
+.guided-article .infra-figure { margin-block: 34px; }
+.guided-article .infra-figure figcaption { line-height: 1.8; }
+.guided-article .source-note { line-height: 1.85; }
+
+@media (max-width: 620px) {
+  .guided-article .shell-narrow { width: calc(100% - 36px); }
+  .guided-article .post-body { font-size: 1rem; line-height: 1.95; }
+  .guided-article .post-body h2 { margin-top: 2.8em; font-size: 1.3rem; }
+  .guided-article .post-body h3 { font-size: 1.08rem; }
+  .guided-article .reading-guide { padding: 17px 18px; }
+  .guided-article .step-flow { padding-inline: 16px; }
+  .guided-article .step-flow li { grid-template-columns: 54px minmax(0, 1fr); gap: 12px; padding-block: 18px; }
+  .guided-article .step-flow dl { grid-template-columns: 1fr; gap: 3px; }
+  .guided-article .step-flow dd + dt { margin-top: 9px; }
+  .guided-article .post-body pre { padding: 16px; font-size: .78rem; }
+  .guided-article .post-body table th, .guided-article .post-body table td { min-width: 115px; padding: 10px 12px; }
+}
+
 @media (max-width: 860px) {
   .hero-grid { min-height: auto; grid-template-columns: 1fr; gap: 55px; padding-block: 70px; }
   .hero-copy h1 { font-size: clamp(2rem, 6vw, 3rem); }
