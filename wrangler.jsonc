@@ -1,0 +1,18 @@
+{
+  // Cloudflare Workers deploy config for the Jekyll blog.
+  // Workers Builds reads this file and uses it instead of the (broken)
+  // auto-detected "npx bundle exec jekyll build" command.
+  // NOTE: bundle is Ruby Bundler, not an npm package - never prefix with npx.
+  "name": "blogs",
+  "compatibility_date": "2026-11-08",
+  "main": "./worker.js",
+  "assets": {
+    "directory": "./_site",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash"
+  },
+  "build": {
+    "command": "bundle install && bundle exec jekyll build"
+  }
+}

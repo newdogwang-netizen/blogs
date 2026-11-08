@@ -35,3 +35,8 @@ exclude:
   - outputs
   - research
   - README.md
+  - Gemfile
+  - Gemfile.lock
+  - wrangler.jsonc
+  - worker.js
+  - .ruby-version
