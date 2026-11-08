@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
   <title id="title">SLP3 知识依赖地图</title><desc id="desc">从输入表示、概率学习到模型、系统与语言结构的知识路径。</desc>
   <defs><style>
-    .bg{fill:#F4F4F8}.box{fill:#FFFFFF;stroke:#D7D7DB;stroke-width:2}.core{fill:#1E1C32;stroke:#1E1C32}.accent{fill:#5A56B4;stroke:#5A56B4}.t{font:600 22px system-ui,"Microsoft YaHei",sans-serif;fill:#1E1C32}.s{font:15px system-ui,"Microsoft YaHei",sans-serif;fill:#68677A}.w{fill:#fff}.line{fill:none;stroke:#9190A4;stroke-width:2.5;marker-end:url(#arrow)}.dash{fill:none;stroke:#9190A4;stroke-width:2;stroke-dasharray:8 8;marker-end:url(#arrow)}
-  </style><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0 0L9 3 0 6Z" fill="#9190A4"/></marker></defs>
+    .bg{fill:#f7f4eb}.box{fill:#fffdf7;stroke:#bdb6a6;stroke-width:2}.core{fill:#183f37;stroke:#183f37}.accent{fill:#e65324;stroke:#e65324}.t{font:600 22px system-ui,"Microsoft YaHei",sans-serif;fill:#171914}.s{font:15px system-ui,"Microsoft YaHei",sans-serif;fill:#66695f}.w{fill:#fff}.line{fill:none;stroke:#827c70;stroke-width:2.5;marker-end:url(#arrow)}.dash{fill:none;stroke:#827c70;stroke-width:2;stroke-dasharray:8 8;marker-end:url(#arrow)}
+  </style><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0 0L9 3 0 6Z" fill="#827c70"/></marker></defs>
   <rect class="bg" width="1200" height="680" rx="12"/>
   <text class="t" x="60" y="58">SLP3（2026）不是“LLM 使用说明”，而是一条完整的语言技术栈</text>
   <text class="s" x="60" y="87">实线表示主要知识依赖；虚线表示模型回到具体任务后的连接。</text>

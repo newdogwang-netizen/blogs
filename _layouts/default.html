@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#f4f4f8">
+    <meta name="theme-color" content="#f4f1e8">
     {% seo %}
     <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}?v={{ site.github.build_revision }}">
     <link rel="alternate" type="application/atom+xml" title="{{ site.title }}" href="{{ '/feed.xml' | relative_url }}">
@@ -20,9 +20,10 @@
     <header class="site-header">
       <div class="shell header-inner">
         <a class="brand" href="{{ '/' | relative_url }}" aria-label="返回首页">
-          <svg class="brand-mark" viewBox="0 0 48 48" role="img" aria-hidden="true">
-            <path d="M27 8H8v32h32V21" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="square"></path>
-            <rect x="33" y="3" width="11" height="11" fill="#9ec480"></rect>
+          <svg class="brand-mark" viewBox="0 0 40 40" role="img" aria-hidden="true">
+            <circle cx="20" cy="20" r="5"></circle>
+            <ellipse cx="20" cy="20" rx="17" ry="8"></ellipse>
+            <ellipse cx="20" cy="20" rx="8" ry="17" transform="rotate(38 20 20)"></ellipse>
           </svg>
           <span><strong>newdogwang's</strong> blog</span>
         </a>
