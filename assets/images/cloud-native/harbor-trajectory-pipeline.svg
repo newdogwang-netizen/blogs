@@ -1,41 +1,41 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 700" role="img" aria-labelledby="title desc">
   <title id="title">Harbor 从 Agent 原生记录到统一轨迹的路径</title>
   <desc id="desc">Trial 启动不同 Agent，原生 session、JSON 输出流和外部执行循环通过各自转换逻辑生成 ATIF。日志在宿主机独立 trial 目录保存，再供 viewer 和 Hub 使用。</desc>
-  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#526e83"/></marker></defs>
-  <rect width="1080" height="700" fill="#f7f4eb"/>
-  <g font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" fill="#25352f">
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#49439C"/></marker></defs>
+  <rect width="1080" height="700" fill="#F4F4F8"/>
+  <g font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" fill="#1E1C32">
     <text x="36" y="46" font-size="28">不同 Agent，共用 Trial 与 ATIF 消费路径</text>
-    <text x="36" y="80" font-size="18" fill="#5c6d64">原生记录和转换器因 Agent 而异；保存与消费围绕同一个 trial 组织</text>
-    <rect x="320" y="112" width="440" height="65" rx="12" fill="#e5efe8" stroke="#81978b"/>
+    <text x="36" y="80" font-size="18" fill="#68677A">原生记录和转换器因 Agent 而异；保存与消费围绕同一个 trial 组织</text>
+    <rect x="320" y="112" width="440" height="65" rx="12" fill="#F1F1FB" stroke="#9190A4"/>
     <text x="540" y="151" text-anchor="middle" font-size="23">Trial：task × agent × attempt</text>
-    <g fill="none" stroke="#526e83" stroke-width="2.5" marker-end="url(#arrow)">
+    <g fill="none" stroke="#49439C" stroke-width="2.5" marker-end="url(#arrow)">
       <path d="M430 177V200H200V224"/><path d="M540 177V224"/><path d="M650 177V200H880V224"/>
     </g>
-    <rect x="45" y="227" width="310" height="92" rx="12" fill="#e5edf3" stroke="#81978b"/>
+    <rect x="45" y="227" width="310" height="92" rx="12" fill="#E4E4F7" stroke="#9190A4"/>
     <text x="200" y="262" text-anchor="middle" font-size="23">Claude Code / Codex</text>
-    <text x="200" y="292" text-anchor="middle" font-size="19" fill="#5c6d64">原生 session JSONL</text>
-    <rect x="385" y="227" width="310" height="92" rx="12" fill="#e5edf3" stroke="#81978b"/>
+    <text x="200" y="292" text-anchor="middle" font-size="19" fill="#68677A">原生 session JSONL</text>
+    <rect x="385" y="227" width="310" height="92" rx="12" fill="#E4E4F7" stroke="#9190A4"/>
     <text x="540" y="262" text-anchor="middle" font-size="23">OpenCode</text>
-    <text x="540" y="292" text-anchor="middle" font-size="19" fill="#5c6d64">JSON stdout → opencode.txt</text>
-    <rect x="725" y="227" width="310" height="92" rx="12" fill="#faead7" stroke="#81978b"/>
+    <text x="540" y="292" text-anchor="middle" font-size="19" fill="#68677A">JSON stdout → opencode.txt</text>
+    <rect x="725" y="227" width="310" height="92" rx="12" fill="#E4E4F7" stroke="#9190A4"/>
     <text x="880" y="262" text-anchor="middle" font-size="23">Terminus-2</text>
-    <text x="880" y="292" text-anchor="middle" font-size="19" fill="#5c6d64">执行循环直接构建 Step</text>
-    <g fill="none" stroke="#526e83" stroke-width="2.5" marker-end="url(#arrow)">
+    <text x="880" y="292" text-anchor="middle" font-size="19" fill="#68677A">执行循环直接构建 Step</text>
+    <g fill="none" stroke="#49439C" stroke-width="2.5" marker-end="url(#arrow)">
       <path d="M200 319V354"/><path d="M540 319V354"/><path d="M880 319V470H763"/>
     </g>
-    <rect x="45" y="357" width="650" height="66" rx="12" fill="#e5efe8" stroke="#81978b"/>
+    <rect x="45" y="357" width="650" height="66" rx="12" fill="#F1F1FB" stroke="#9190A4"/>
     <text x="370" y="397" text-anchor="middle" font-size="23">日志挂载 / 下载 → agent 专用转换函数</text>
-    <path d="M370 423V438" fill="none" stroke="#526e83" stroke-width="2.5" marker-end="url(#arrow)"/>
-    <rect x="320" y="441" width="440" height="82" rx="12" fill="#e5efe8" stroke="#81978b"/>
+    <path d="M370 423V438" fill="none" stroke="#49439C" stroke-width="2.5" marker-end="url(#arrow)"/>
+    <rect x="320" y="441" width="440" height="82" rx="12" fill="#F1F1FB" stroke="#9190A4"/>
     <text x="540" y="476" text-anchor="middle" font-size="23">agent/trajectory.json</text>
-    <text x="540" y="505" text-anchor="middle" font-size="18" fill="#5c6d64">Pydantic 模型 → ATIF JSON</text>
-    <g fill="none" stroke="#526e83" stroke-width="2.5" marker-end="url(#arrow)">
+    <text x="540" y="505" text-anchor="middle" font-size="18" fill="#68677A">Pydantic 模型 → ATIF JSON</text>
+    <g fill="none" stroke="#49439C" stroke-width="2.5" marker-end="url(#arrow)">
       <path d="M440 523V554H245V578"/><path d="M640 523V554H815V578"/>
     </g>
-    <rect x="70" y="581" width="350" height="65" rx="12" fill="#e5edf3" stroke="#81978b"/>
+    <rect x="70" y="581" width="350" height="65" rx="12" fill="#E4E4F7" stroke="#9190A4"/>
     <text x="245" y="621" text-anchor="middle" font-size="22">本地 Viewer / 分析 / 校验</text>
-    <rect x="640" y="581" width="350" height="65" rx="12" fill="#e5edf3" stroke="#81978b"/>
+    <rect x="640" y="581" width="350" height="65" rx="12" fill="#E4E4F7" stroke="#9190A4"/>
     <text x="815" y="621" text-anchor="middle" font-size="22">Hub：归档 + 对象 + 元数据</text>
-    <text x="36" y="681" font-size="16" fill="#5c6d64">基于 Harbor f6cf2e2 的机制示意；箭头表示数据生成与收集关系。</text>
+    <text x="36" y="681" font-size="16" fill="#68677A">基于 Harbor f6cf2e2 的机制示意；箭头表示数据生成与收集关系。</text>
   </g>
 </svg>
